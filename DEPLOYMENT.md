@@ -8,7 +8,7 @@ This project deploys as one Vercel application:
 - `api/[...path].js` serves the Express REST API.
 - MongoDB Atlas remains the persistent database.
 
-The repository declares `npm run build` and `dist` as the Vercel build settings. In the Vercel dashboard, set the project Root Directory to the repository root and remove any override that uses `server`, `server/index.js`, or `npm run server` as the build/output setting. `npm run server` is only for local development; Vercel uses `api/[...path].js` for the backend function.
+The repository declares `npm install`, `npm run build`, and `./dist` as the Vercel build settings. In the Vercel dashboard, set the project Root Directory to `./` (the repository root) and remove any override that uses `server`, `server/index.js`, or `npm run server` as the build/output setting. `npm run server` is only for local development; Vercel uses `api/[...path].js` for the backend function.
 
 Add these variables in Vercel Project Settings for Production, Preview, and Development as appropriate:
 

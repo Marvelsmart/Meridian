@@ -5,6 +5,10 @@ import { fileURLToPath, URL } from 'node:url'
 
 export default defineConfig({
   base: process.env.VERCEL ? '/' : './',
+  build: {
+    outDir: 'dist',
+    emptyOutDir: true,
+  },
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {
