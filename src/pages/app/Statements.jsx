@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Download, FileText, Printer } from 'lucide-react'
+import { cn } from '@/lib/cn'
 import { AccountSelect } from '@/components/banking'
 import { useAppData } from '@/context/AppDataContext'
 import { useToast } from '@/context/ToastContext'
@@ -142,30 +143,67 @@ export default function Statements() {
 
         <div className="p-4">
           {error ? <p className="text-[13px] text-danger-600">{error.message}</p> : statement?.transactions.length ? (
-            <div className="overflow-x-auto">
-              <table className="min-w-full text-left text-[12.5px]">
-                <thead>
-                  <tr className="border-b border-ink-100 text-ink-500">
-                    <th className="py-2 pr-4">Date</th>
-                    <th className="py-2 pr-4">Description</th>
-                    <th className="py-2 pr-4">Type</th>
-                    <th className="py-2 pr-4">Amount</th>
-                    <th className="py-2 pr-4">Balance</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {statement.transactions.map((transaction) => (
-                    <tr key={transaction.id} className="border-b border-ink-100">
-                      <td className="py-2 pr-4">{new Date(transaction.date).toLocaleDateString('en-GB')}</td>
-                      <td className="py-2 pr-4">{transaction.description}</td>
-                      <td className="py-2 pr-4">{transaction.type}</td>
-                      <td className="py-2 pr-4">{formatCurrency(transaction.amount)}</td>
-                      <td className="py-2 pr-4">{formatCurrency(transaction.balanceAfter ?? 0)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <>
+              {/* Mobile: one compact row per transaction — no horizontal page scroll. */}
+              <ul className="divide-y divide-ink-100 md:hidden">
+                {statement.transactions.map((transaction) => (
+                  <li key={transaction.id} className="flex items-start justify-between gap-3 py-3">
+                    <div className="min-w-0">
+                      <p className="truncate text-[13px] font-medium text-ink-900">{transaction.description}</p>
+                      <p className="mt-0.5 text-[12px] text-ink-500">
+                        {new Date(transaction.date).toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric',
+                        })}
+                        {' · '}
+                        <span className="capitalize">{transaction.type}</span>
+                      </p>
+                      <p className="amount mt-0.5 text-[11.5px] text-ink-400">
+                        Balance {formatCurrency(transaction.balanceAfter ?? 0)}
+                      </p>
+                    </div>
+                    <span
+                      className={cn(
+                        'amount shrink-0 text-[13px] font-semibold',
+                        transaction.type === 'credit' ? 'text-success-600' : 'text-ink-900',
+                      )}
+                    >
+                      {transaction.type === 'credit' ? '+' : '−'}
+                      {formatCurrency(transaction.amount)}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+
+              {/* Tablet and up: the full statement table. */}
+              <div className="hidden md:block">
+                <div className="overflow-x-auto">
+                  <table className="min-w-full text-left text-[12.5px]">
+                    <thead>
+                      <tr className="border-b border-ink-100 text-ink-500">
+                        <th className="py-2 pr-4">Date</th>
+                        <th className="py-2 pr-4">Description</th>
+                        <th className="py-2 pr-4">Type</th>
+                        <th className="py-2 pr-4">Amount</th>
+                        <th className="py-2 pr-4">Balance</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {statement.transactions.map((transaction) => (
+                        <tr key={transaction.id} className="border-b border-ink-100">
+                          <td className="py-2 pr-4">{new Date(transaction.date).toLocaleDateString('en-GB')}</td>
+                          <td className="py-2 pr-4">{transaction.description}</td>
+                          <td className="py-2 pr-4">{transaction.type}</td>
+                          <td className="py-2 pr-4">{formatCurrency(transaction.amount)}</td>
+                          <td className="py-2 pr-4">{formatCurrency(transaction.balanceAfter ?? 0)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </>
           ) : (
             <div className="flex flex-col items-center justify-center py-12 text-center">
               <FileText className="size-8 text-ink-400" />

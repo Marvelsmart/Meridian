@@ -1,14 +1,13 @@
 import {
   ArrowLeftRight,
-  Banknote,
   BarChart3,
   Bell,
   CreditCard,
   FileText,
   Grid2x2,
   Home,
-  Landmark,
   LayoutDashboard,
+  LifeBuoy,
   PiggyBank,
   Send,
   Settings,
@@ -46,6 +45,7 @@ export const NAV_GROUPS = [
       { label: 'Notifications', to: '/app/notifications', icon: Bell },
       { label: 'Profile', to: '/app/profile', icon: UserRound },
       { label: 'Security', to: '/app/security', icon: ShieldCheck },
+      { label: 'Support', to: '/app/support', icon: LifeBuoy },
     ],
   },
 ]
@@ -68,17 +68,16 @@ export const MOBILE_MORE_LINKS = [
   { label: 'Notifications', to: '/app/notifications', icon: Bell, description: 'Alerts & updates' },
   { label: 'Profile', to: '/app/profile', icon: UserRound, description: 'Personal information' },
   { label: 'Security', to: '/app/security', icon: ShieldCheck, description: 'Password, 2FA, sessions' },
+  { label: 'Support', to: '/app/support', icon: LifeBuoy, description: 'Chat, call or email us' },
 ]
 
 /** Dashboard quick actions — the 8 primary jobs to be done. */
 export const QUICK_ACTIONS = [
   { label: 'Send Money', icon: Send, to: '/app/transfer', description: 'To any Northstar account' },
-  { label: 'Transfer', icon: Landmark, to: '/app/transfer?mode=other-bank', description: 'To other banks' },
+  { label: 'Investments', icon: PiggyBank, to: '/app/statements', description: 'Track your financial goals' },
   { label: 'Add Money', icon: Upload, action: 'deposit', description: 'Fund your account' },
-  { label: 'Withdraw', icon: Banknote, action: 'withdraw', description: 'Cash at any ATM' },
   { label: 'Pay Bills', icon: ReceiptText, to: '/app/bills', description: 'Utilities & TV' },
   { label: 'Cards', icon: CreditCard, to: '/app/cards', description: 'Manage & freeze' },
-  { label: 'Cards', icon: CreditCard, to: '/app/cards', description: 'Freeze & limits' },
 ]
 
 export const DASHBOARD_LINKS = [

@@ -2,6 +2,7 @@ import { Link, Outlet } from 'react-router-dom'
 import { ShieldCheck, Sparkles, Wallet } from 'lucide-react'
 import { BRAND } from '@/lib/constants'
 import { Button } from '@/components/ui'
+import { SupportCard } from '@/components/banking'
 import { Logo } from './Logo'
 
 /** Marketing shell for the landing page. */
@@ -71,6 +72,7 @@ export function PublicLayout() {
               <li>{BRAND.supportEmail}</li>
               <li>{BRAND.address}</li>
             </ul>
+            <SupportCard variant="compact" title="Need help?" description="Chat with Support on WhatsApp." className="mt-4" />
             <ul className="mt-5 space-y-2 text-[12.5px] text-ink-400">
               <li className="flex items-center gap-2">
                 <ShieldCheck className="size-3.5" aria-hidden="true" />

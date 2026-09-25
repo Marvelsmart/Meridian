@@ -9,7 +9,7 @@ import { useToast } from '@/context/ToastContext'
 import { useDisclosure } from '@/hooks/useDisclosure'
 import { useDocumentTitle } from '@/hooks/useLocalStorage'
 import { Alert, Avatar, Badge, Button, Card, Checkbox, EmptyState, Input, Modal, SectionCard, Select, StepIndicator, Tabs, Textarea } from '@/components/ui'
-import { AccountSelect, AmountInput, BeneficiaryFormDialog, ProcessingPanel, ReviewList, SuccessPanel } from '@/components/banking'
+import { AccountSelect, AmountInput, BeneficiaryFormDialog, DeviceValidationModal, ProcessingPanel, ReviewList, SuccessPanel } from '@/components/banking'
 import { PROCESSING_STEPS, TRANSFER_STEPS, useTransferFlow } from './useTransferFlow'
 
 const NARRATION_CHIPS = ['Rent', 'School fees', 'Family support', 'Project payment', 'Refund', 'Shopping']
@@ -141,7 +141,7 @@ export default function Transfer() {
                     required
                   />
 
-                  <div className="flex items-end gap-2">
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
                     <Input
                       label="Account number"
                       inputMode="numeric"
@@ -157,7 +157,7 @@ export default function Transfer() {
                     />
                     <Button
                       variant="secondary"
-                      className="mb-0.5 shrink-0"
+                      className="shrink-0 sm:mb-0.5"
                       icon={Search}
                       loading={flow.resolving}
                       disabled={flow.form.accountNumber.length !== 10 || !flow.form.bankCode}
@@ -340,7 +340,7 @@ export default function Transfer() {
               <Button variant="secondary" onClick={flow.goBack}>
                 Back
               </Button>
-              <Button onClick={() => flow.setStep('confirm')}>Confirm and continue</Button>
+              <Button onClick={flow.beginAuthorization}>Confirm and continue</Button>
             </div>
           </Card>
         </div>
@@ -421,6 +421,7 @@ export default function Transfer() {
           flow.setMode('saved')
         }}
       />
+      <DeviceValidationModal open={flow.deviceBlocked} onClose={() => flow.setDeviceBlocked(false)} />
     </div>
   )
 }

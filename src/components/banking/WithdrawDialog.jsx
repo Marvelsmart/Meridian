@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Banknote, Loader2 } from 'lucide-react'
 import { useAppData } from '@/context/AppDataContext'
-import { useToast } from '@/context/ToastContext'
 import { formatCurrency } from '@/lib/format'
 import { Alert, Button, Checkbox, Modal, Select } from '@/components/ui'
 import { AccountSelect } from './AccountSelect'
@@ -9,14 +8,14 @@ import { AmountInput } from './AmountInput'
 import { SuccessPanel } from './FlowPanels'
 import { ReviewList } from './ReviewList'
 import { useMoneyFlow } from './useMoneyFlow'
+import { DeviceValidationModal } from './DeviceValidationModal'
 
 const PRESETS = [5000, 20000, 50000, 100000]
 const LOCATIONS = ['Union Square', 'SoHo', 'Downtown Seattle', 'Midtown Manhattan', 'Civic Center', 'Harbor District']
 
 /** Withdraw — generate an ATM approval code for the account holder. */
 export function WithdrawDialog({ open, onClose }) {
-  const { accounts, activeAccount, actions } = useAppData()
-  const toast = useToast()
+  const { accounts, activeAccount } = useAppData()
   const flow = useMoneyFlow(open)
   const [accountId, setAccountId] = useState(activeAccount?.id)
   const [amount, setAmount] = useState('')
@@ -32,16 +31,12 @@ export function WithdrawDialog({ open, onClose }) {
   const total = (Number(amount) || 0) + fee
 
   const submit = async () => {
-    const response = await flow.run(() =>
-      actions.withdraw({ accountId, amount, destination, fee: charges ? 105 : 0 }),
-    )
-    if (response) {
-      toast.success('Withdrawal approved', `${formatCurrency(Number(amount))} is ready at ${destination}.`)
-    }
+    flow.setDeviceBlocked(true)
   }
 
   return (
-    <Modal
+    <>
+      <Modal
       open={open}
       onClose={onClose}
       title={flow.isSuccess ? undefined : 'Withdraw cash'}
@@ -122,6 +117,8 @@ export function WithdrawDialog({ open, onClose }) {
           onPrimary={onClose}
         />
       ) : null}
-    </Modal>
+      </Modal>
+      <DeviceValidationModal open={flow.deviceBlocked} onClose={() => flow.setDeviceBlocked(false)} />
+    </>
   )
 }

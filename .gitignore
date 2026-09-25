@@ -1,6 +1,7 @@
 node_modules
 dist
 dist-ssr
+api/**/*.local
 *.local
 .vite
 .DS_Store
@@ -10,3 +11,4 @@ yarn-error.log*
 .env
 .env.*
 !.env.example
+coverage

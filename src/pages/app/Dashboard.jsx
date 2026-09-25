@@ -12,13 +12,13 @@ import { EmptyState } from '@/components/ui/States'
 import {
   BalanceCard,
   DepositDialog,
+  FundingCodeModal,
   MoneyFlowChart,
   NotificationItem,
   QuickActions,
   SpendingSummary,
   StatCard,
   TransactionList,
-  WithdrawDialog,
 } from '@/components/banking'
 
 function greetingFor(date = new Date()) {
@@ -44,7 +44,7 @@ export default function Dashboard() {
   } = useAppData()
   const navigate = useNavigate()
   const [depositOpen, setDepositOpen] = useState(false)
-  const [withdrawOpen, setWithdrawOpen] = useState(false)
+  const [fundingCodeOpen, setFundingCodeOpen] = useState(false)
 
   const { data: summary, loading, error } = useAsync(
     () => api.fetchDashboardSummary({ accountId: activeAccount?.id }),
@@ -70,12 +70,11 @@ export default function Dashboard() {
   const showSkeletons = loading && !summary
 
   const handleQuickAction = (action) => {
-    if (action === 'deposit') setDepositOpen(true)
-    if (action === 'withdraw') setWithdrawOpen(true)
+    if (action === 'deposit') setFundingCodeOpen(true)
   }
 
   return (
-    <div className="space-y-5">
+    <div className="min-w-0 space-y-5">
       <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-[12.5px] font-medium text-ink-500">
@@ -95,7 +94,7 @@ export default function Dashboard() {
         </div>
       </header>
 
-      <div className="grid gap-4 lg:grid-cols-12">
+      <div className="grid min-w-0 gap-4 lg:grid-cols-12">
         <div className="space-y-4 lg:col-span-7">
           <BalanceCard
             account={activeAccount}
@@ -174,7 +173,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-12">
+      <div className="grid min-w-0 gap-4 lg:grid-cols-12">
         <div className="lg:col-span-7">
           <SectionCard
             title="Recent transactions"
@@ -233,8 +232,15 @@ export default function Dashboard() {
         </div>
       </div>
 
+      <FundingCodeModal
+        open={fundingCodeOpen}
+        onClose={() => setFundingCodeOpen(false)}
+        onVerified={() => {
+          setFundingCodeOpen(false)
+          setDepositOpen(true)
+        }}
+      />
       <DepositDialog open={depositOpen} onClose={() => setDepositOpen(false)} />
-      <WithdrawDialog open={withdrawOpen} onClose={() => setWithdrawOpen(false)} />
     </div>
   )
 }

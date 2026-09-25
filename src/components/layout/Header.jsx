@@ -16,7 +16,7 @@ export function Header({ className = '' }) {
   return (
     <header
       className={cn(
-        'sticky top-0 z-30 flex h-16 items-center gap-4 border-b border-ink-200 bg-white/95 px-4 backdrop-blur sm:px-6 lg:px-8',
+        'sticky top-0 z-30 hidden h-16 items-center gap-4 border-b border-ink-200 bg-white/95 px-4 backdrop-blur sm:px-6 lg:flex lg:px-8',
         className,
       )}
     >

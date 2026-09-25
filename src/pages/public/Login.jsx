@@ -1,10 +1,9 @@
 import { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { AlertCircle, KeyRound } from 'lucide-react'
+import { AlertCircle } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import { useToast } from '@/context/ToastContext'
 import { useDocumentTitle } from '@/hooks/useLocalStorage'
-import * as api from '@/lib/api'
 import { Alert, Button, Checkbox, Input } from '@/components/ui'
 import { AuthLayout } from '@/components/layout/AuthLayout'
 
@@ -23,12 +22,6 @@ export default function Login() {
   const update = (field) => (event) => {
     setValues((current) => ({ ...current, [field]: event.target.value }))
     setErrors((current) => ({ ...current, [field]: undefined }))
-    setFormError(null)
-  }
-
-  const useDemoCredentials = () => {
-    setValues({ email: api.demoCredentials.email, password: api.demoCredentials.password })
-    setErrors({})
     setFormError(null)
   }
 
@@ -107,24 +100,6 @@ export default function Login() {
           Sign in
         </Button>
 
-        <div className="rounded-card border border-dashed border-ink-300 bg-ink-50 p-3.5">
-          <p className="flex items-center gap-2 text-[12.5px] font-semibold text-ink-800">
-            <KeyRound className="size-3.5 text-brand-600" aria-hidden="true" />
-            Demo credentials
-          </p>
-          <p className="mt-1 text-[12.5px] leading-5 text-ink-500">
-            {api.demoCredentials.email}
-            <br />
-            {api.demoCredentials.password}
-          </p>
-          <button
-            type="button"
-            onClick={useDemoCredentials}
-            className="mt-2 text-[12.5px] font-semibold text-brand-700 hover:underline"
-          >
-            Fill demo credentials
-          </button>
-        </div>
       </form>
     </AuthLayout>
   )

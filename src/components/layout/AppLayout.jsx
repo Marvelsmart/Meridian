@@ -1,13 +1,13 @@
 import { useMemo, useState } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
-import { ChevronRight, LogOut, Mail, Phone } from 'lucide-react'
+import { ChevronRight, LogOut } from 'lucide-react'
 import { cn } from '@/lib/cn'
-import { BRAND } from '@/lib/constants'
 import { MOBILE_MORE_LINKS, NAV_GROUPS } from '@/config/navigation'
 import { useAppData } from '@/context/AppDataContext'
 import { useAuth } from '@/context/AuthContext'
 import { Avatar, Drawer, Spinner } from '@/components/ui'
 import { ErrorState } from '@/components/ui/States'
+import { SupportCard } from '@/components/banking'
 import { Logo } from './Logo'
 import { Sidebar } from './Sidebar'
 import { Header } from './Header'
@@ -57,11 +57,11 @@ export function AppLayout() {
     <div className="min-h-screen bg-ink-50">
       <Sidebar />
 
-      <div className="lg:pl-[264px]">
+      <div className="min-w-0 lg:pl-[264px]">
         <Header />
         <MobileHeader title={title} />
 
-        <main className="mx-auto w-full max-w-[1180px] px-4 pb-28 pt-5 sm:px-6 lg:px-8 lg:pb-14 lg:pt-7">
+        <main className="mx-auto min-w-0 w-full max-w-[1180px] overflow-x-clip px-4 pb-28 pt-5 sm:px-6 lg:px-8 lg:pb-14 lg:pt-7">
           <Outlet />
         </main>
       </div>
@@ -113,16 +113,7 @@ export function AppLayout() {
           })}
         </ul>
 
-        <div className="mt-4 space-y-2 rounded-card bg-ink-50 p-3.5 text-[12.5px] text-ink-600">
-          <p className="flex items-center gap-2">
-            <Phone className="size-3.5 text-ink-400" aria-hidden="true" />
-            {BRAND.supportPhone}
-          </p>
-          <p className="flex items-center gap-2">
-            <Mail className="size-3.5 text-ink-400" aria-hidden="true" />
-            {BRAND.supportEmail}
-          </p>
-        </div>
+        <SupportCard className="mt-4" />
 
         <button
           type="button"

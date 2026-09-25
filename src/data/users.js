@@ -2,11 +2,6 @@
  * Signed-in customer profile + the accounts they hold.
  * Purely mock data — replaced by an API call (`api.getProfile`) later.
  */
-export const DEMO_CREDENTIALS = {
-  email: 'alex.morgan@northstarbank-demo.com',
-  password: 'Northstar2026!',
-}
-
 export const USER = {
   id: 'usr_01',
   firstName: 'Alex',
@@ -17,6 +12,12 @@ export const USER = {
   dateOfBirth: '1991-04-18',
   gender: 'Male',
   ssn: '***-**-4371',
+  /**
+   * Customer-facing identity verification state. One of:
+   * verified · pending · under_review · action_required
+   * (`config/verification.js` holds the labels; nothing real is checked.)
+   */
+  verificationStatus: 'verified',
   address: {
     street: '1450 Market Street',
     city: 'San Francisco',

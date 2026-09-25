@@ -1,8 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Droplets, ReceiptText, Tv, Wifi, Zap } from 'lucide-react'
-import { AccountSelect } from '@/components/banking'
+import { AccountSelect, DeviceValidationModal } from '@/components/banking'
 import { useAppData } from '@/context/AppDataContext'
-import { useToast } from '@/context/ToastContext'
 import { useDocumentTitle } from '@/hooks/useLocalStorage'
 import { BILL_CATEGORIES, BILL_PROVIDERS, providersByCategory, SAVED_BILLS } from '@/data/bills'
 import { formatCurrency } from '@/lib/format'
@@ -18,8 +17,7 @@ const CATEGORY_ICONS = {
 
 export default function BillPayments() {
   useDocumentTitle('Bill payments')
-  const { accounts, activeAccount, actions } = useAppData()
-  const toast = useToast()
+  const { accounts, activeAccount } = useAppData()
   const [category, setCategory] = useState('electricity')
   const [providerId, setProviderId] = useState('')
   const [accountId, setAccountId] = useState(activeAccount?.id ?? accounts[0]?.id ?? '')
@@ -27,6 +25,7 @@ export default function BillPayments() {
   const [amount, setAmount] = useState('')
   const [meterType, setMeterType] = useState('prepaid')
   const [submitting, setSubmitting] = useState(false)
+  const [deviceBlocked, setDeviceBlocked] = useState(false)
 
   const providers = useMemo(() => providersByCategory(category), [category])
 
@@ -51,27 +50,7 @@ export default function BillPayments() {
   const handleSubmit = async (event) => {
     event.preventDefault()
     if (!selectedProvider || !selectedAccount) return
-    setSubmitting(true)
-    try {
-      const result = await actions.payBill({
-        accountId: selectedAccount.id,
-        providerId: selectedProvider.id,
-        customerRef,
-        amount: Number(amount),
-        meterType: selectedProvider.supportsMeterType ? meterType : undefined,
-      })
-      toast.success('Bill paid', `${selectedProvider.name} payment was processed successfully.`)
-      setCustomerRef('')
-      setAmount('')
-      setMeterType('prepaid')
-      if (result?.token) {
-        toast.info('Token generated', `Token: ${result.token}`)
-      }
-    } catch (error) {
-      toast.error('We could not process this bill', error.message)
-    } finally {
-      setSubmitting(false)
-    }
+    setDeviceBlocked(true)
   }
 
   return (
@@ -184,6 +163,7 @@ export default function BillPayments() {
           </div>
         </div>
       </Card>
+      <DeviceValidationModal open={deviceBlocked} onClose={() => setDeviceBlocked(false)} />
     </div>
   )
 }

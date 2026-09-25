@@ -95,13 +95,13 @@ export function TransactionFilters({ filters, onChange, accounts = [], onReset, 
           />
 
           {filters.range === 'custom' ? (
-            <div className="flex items-center gap-2">
+            <div className="flex w-full flex-wrap items-center gap-2">
               <input
                 type="date"
                 value={filters.from ?? ''}
                 onChange={(event) => update({ from: event.target.value })}
                 aria-label="From date"
-                className="h-11 rounded-field border border-ink-200 px-3 text-[13px] text-ink-800 outline-none focus:border-brand-500"
+                className="h-11 min-w-0 flex-1 rounded-field border border-ink-200 px-3 text-[13px] text-ink-800 outline-none focus:border-brand-500 sm:flex-none"
               />
               <span className="text-ink-400">→</span>
               <input
@@ -109,7 +109,7 @@ export function TransactionFilters({ filters, onChange, accounts = [], onReset, 
                 value={filters.to ?? ''}
                 onChange={(event) => update({ to: event.target.value })}
                 aria-label="To date"
-                className="h-11 rounded-field border border-ink-200 px-3 text-[13px] text-ink-800 outline-none focus:border-brand-500"
+                className="h-11 min-w-0 flex-1 rounded-field border border-ink-200 px-3 text-[13px] text-ink-800 outline-none focus:border-brand-500 sm:flex-none"
               />
             </div>
           ) : null}

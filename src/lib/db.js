@@ -28,7 +28,7 @@ function seed() {
     cards: clone(CARDS),
     notifications: clone(NOTIFICATIONS),
     sessions: clone(ACTIVE_SESSIONS),
-    password: 'Northstar2026!',
+    password: '',
   }
 }
 

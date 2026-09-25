@@ -81,7 +81,7 @@ export default function Landing() {
                 Open an account
               </Button>
               <Button size="lg" variant="secondary" to="/login">
-                Sign in to demo
+                Sign in
               </Button>
             </div>
 
@@ -277,10 +277,10 @@ export default function Landing() {
           <div className="mt-14 flex flex-col items-start justify-between gap-6 rounded-card border border-ink-200 bg-ink-50 p-6 sm:flex-row sm:items-center sm:p-8">
             <div>
               <h2 className="text-[20px] font-semibold tracking-[-0.02em] text-ink-900">
-                Try the full product with demo data.
+                Try the full product.
               </h2>
               <p className="mt-1.5 text-[13.5px] text-ink-600">
-                Sign in with {BRAND.name} demo credentials and explore every screen — nothing you do affects real money.
+                Explore the banking experience in a fictional environment — nothing you do affects real money.
               </p>
             </div>
             <div className="flex shrink-0 gap-3">

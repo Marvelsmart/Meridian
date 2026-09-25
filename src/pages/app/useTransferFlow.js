@@ -47,6 +47,7 @@ export function useTransferFlow({ accounts, activeAccount, actions, searchParams
   const [form, setForm] = useState({ bankCode: '', accountNumber: '' })
   const [formErrors, setFormErrors] = useState({})
   const [resolving, setResolving] = useState(false)
+  const [deviceBlocked, setDeviceBlocked] = useState(false)
 
   const selectedAccount = accounts.find((account) => account.id === accountId) ?? activeAccount
   const fee = transferFee(amount)
@@ -118,6 +119,7 @@ export function useTransferFlow({ accounts, activeAccount, actions, searchParams
       return null
     }
     setError(null)
+    setDeviceBlocked(false)
     setStep('processing')
     setProcessingIndex(0)
     const ticker = setInterval(
@@ -147,12 +149,19 @@ export function useTransferFlow({ accounts, activeAccount, actions, searchParams
       setStep('success')
       return response.transaction
     } catch (err) {
+      setDeviceBlocked(err.code === 'device_not_validated')
       setError(err.message)
       setStep('confirm')
       return null
     } finally {
       clearInterval(ticker)
     }
+  }
+
+  const beginAuthorization = () => {
+    setStep('confirm')
+    setDeviceBlocked(true)
+    return true
   }
 
   const resetFlow = () => {
@@ -195,6 +204,7 @@ export function useTransferFlow({ accounts, activeAccount, actions, searchParams
     formErrors,
     setFormErrors,
     resolving,
+    deviceBlocked,
     selectedAccount,
     fee,
     total,
@@ -203,6 +213,7 @@ export function useTransferFlow({ accounts, activeAccount, actions, searchParams
     goNext,
     goBack,
     submitTransfer,
+    beginAuthorization,
     resetFlow,
   }
 }

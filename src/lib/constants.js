@@ -86,3 +86,53 @@ export const TRANSACTION_CHANNELS = {
   online: 'Online banking',
 }
 
+/**
+ * Customer-facing transaction types, derived from the category + direction +
+ * channel that every transaction already carries. Deriving (instead of storing
+ * a label per row) means a new transaction type can never break the details
+ * screen — an unknown combination simply falls back to a readable default.
+ */
+const TRANSACTION_TYPE_MAP = {
+  'card': { credit: 'Card Refund', debit: 'Card Purchase' },
+  'transfer': { credit: 'ACH Credit', debit: 'ACH Debit' },
+  'bills': { credit: 'Bill Refund', debit: 'Bill Payment' },
+  'withdrawal': { credit: 'ATM Deposit', debit: 'ATM Withdrawal' },
+  'savings': { credit: 'Savings Withdrawal', debit: 'Savings Transfer' },
+  'income': { credit: 'Direct Deposit', debit: 'Income Adjustment' },
+  'refund': { credit: 'Refund', debit: 'Reversal' },
+}
+
+export function transactionTypeLabel(transaction) {
+  if (!transaction) return 'Transaction'
+  const type = transaction.type === 'credit' ? 'credit' : 'debit'
+  if (transaction.category === 'withdrawal') return type === 'debit' ? 'ATM Withdrawal' : 'ATM Deposit'
+  if (transaction.category === 'card') return type === 'debit' ? 'Card Purchase' : 'Card Refund'
+  const mapped = TRANSACTION_TYPE_MAP[transaction.category]
+  if (mapped) return mapped[type]
+  return type === 'credit' ? 'Credit' : 'Debit'
+}
+
+/** How the money moved: card, rail or channel. */
+export function paymentMethodLabel(transaction) {
+  if (!transaction) return '—'
+  if (transaction.cardId) return 'Debit Card'
+  if (transaction.category === 'withdrawal' || transaction.channel === 'atm') return 'ATM'
+  if (transaction.channel === 'pos') return 'Debit Card'
+  if (transaction.channel === 'direct_debit') return 'ACH / Direct debit'
+  if (transaction.category === 'transfer') return 'Bank transfer (ACH)'
+  if (transaction.category === 'bills') return 'Online bill pay'
+  return TRANSACTION_CHANNELS[transaction.channel] ?? 'Bank transfer'
+}
+
+/** Status wording used on receipts and detail screens. */
+export const TRANSACTION_STATUS_LABELS = {
+  successful: 'Completed',
+  pending: 'Pending',
+  failed: 'Failed',
+  reversed: 'Reversed',
+}
+
+export function transactionStatusLabel(status) {
+  return TRANSACTION_STATUS_LABELS[status] ?? (status ? String(status) : 'Unknown')
+}
+

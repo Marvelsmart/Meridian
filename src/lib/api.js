@@ -18,10 +18,12 @@ import {
   resetDatabase,
 } from './db'
 import { filterTransactions, sumsFor, statementTotals, inRange } from './analytics'
-import { DEMO_CREDENTIALS, PROVIDER_BY_ID } from '@/data'
+import { PROVIDER_BY_ID } from '@/data'
 import { readStorage, writeStorage, removeStorage } from './storage'
 import { STORAGE_KEYS } from './constants'
-import { toInputDate } from './format'
+import { toInputDate, formatCurrency } from './format'
+import { formatUsPhoneDisplay, isValidUsPhone, phoneError, toE164 } from './phone'
+import { managerCodeForRegistration } from '@/config/demo'
 
 /**
  * ------------------------------------------------------------------
@@ -37,6 +39,35 @@ import { toInputDate } from './format'
 
 const FAILURE_RATE = Number(import.meta.env.VITE_MOCK_FAILURES ?? 0)
 export const LATENCY = { fast: 180, normal: 420, slow: 900 }
+const API_BASE_URL = import.meta.env.VITE_API_URL ?? '/api'
+
+async function requestBackend(path, options = {}) {
+  let response
+  try {
+    response = await fetch(`${API_BASE_URL}${path}`, {
+      ...options,
+      headers: { 'Content-Type': 'application/json', ...(options.headers ?? {}) },
+    })
+  } catch {
+    throw new ApiError('The banking service is unavailable. Start the backend and try again.', { code: 'network_error' })
+  }
+  const body = await response.json().catch(() => ({}))
+  if (!response.ok) {
+    throw new ApiError(body.error ?? 'The request could not be completed.', {
+      code: body.code ?? 'api_error',
+      fields: body.fields ?? null,
+    })
+  }
+  return body
+}
+
+function isOpeningDeposit(transaction) {
+  return transaction?.meta?.demo === true || transaction?.description === 'Opening deposit — initial demo balance'
+}
+
+function visibleTransactions(transactions) {
+  return transactions.filter((transaction) => !isOpeningDeposit(transaction))
+}
 
 export class ApiError extends Error {
   constructor(message, { code = 'api_error', fields = null } = {}) {
@@ -79,67 +110,27 @@ function requireFields(values, rules) {
 /* ------------------------------------------------------------------ */
 
 export async function login({ email, password }) {
-  const state = getState()
-  const fields = {}
-  if (!String(email ?? '').trim()) fields.email = 'Email is required'
-  if (!String(password ?? '')) fields.password = 'Password is required'
-  if (Object.keys(fields).length) {
-    throw new ApiError('Enter your email and password.', { code: 'validation_error', fields })
-  }
-  const matches =
-    String(email).trim().toLowerCase() === state.user.email.toLowerCase() && password === state.password
-  if (!matches) {
-    throw new ApiError('Incorrect email or password. Please try again.', { code: 'invalid_credentials' })
-  }
-  return settle(
-    {
-      token: `mdn_${Math.random().toString(36).slice(2, 12)}`,
-      issuedAt: new Date().toISOString(),
-      user: state.user,
-    },
-    LATENCY.slow,
-  )
+  const deviceId = readStorage('northstarbank.device-id', null) ?? `web-${Math.random().toString(36).slice(2)}`
+  writeStorage('northstarbank.device-id', deviceId)
+  return requestBackend('/auth/login', {
+    method: 'POST',
+    headers: { 'X-Device-Id': deviceId },
+    body: JSON.stringify({ email, password }),
+  })
 }
 
 export async function register(payload) {
-  requireFields(payload, {
-    firstName: { required: true, label: 'First name', min: 2 },
-    lastName: { required: true, label: 'Last name', min: 2 },
-    email: {
-      required: true,
-      label: 'Email',
-      pattern: /^[^@\s]+@[^@\s]+\.[^@\s]+$/,
-      message: 'Enter a valid email address',
-    },
-    phone: {
-      required: true,
-      label: 'Phone number',
-      pattern: /^(\+?234\d{10}|0\d{10})$/,
-      message: 'Enter a valid U.S. phone number',
-    },
-    password: { required: true, label: 'Password', min: 8 },
+  const managerCode = managerCodeForRegistration()
+  if (!managerCode) {
+    throw new ApiError('Complete the Bank Manager Code step before creating an account.', { code: 'manager_code_required' })
+  }
+  const deviceId = readStorage('northstarbank.device-id', null) ?? `web-${Math.random().toString(36).slice(2)}`
+  writeStorage('northstarbank.device-id', deviceId)
+  return requestBackend('/auth/register', {
+    method: 'POST',
+    headers: { 'X-Device-Id': deviceId },
+    body: JSON.stringify({ ...payload, managerCode }),
   })
-
-  // A real backend would create a customer record. The mock personalises the
-  // demo profile instead, so the whole app immediately reflects the new details.
-  const state = patchState({
-    user: {
-      ...getState().user,
-      firstName: String(payload.firstName).trim(),
-      lastName: String(payload.lastName).trim(),
-      email: String(payload.email).trim().toLowerCase(),
-      phone: String(payload.phone).trim(),
-    },
-  })
-  return settle(
-    {
-      token: `mdn_${Math.random().toString(36).slice(2, 12)}`,
-      issuedAt: new Date().toISOString(),
-      user: state.user,
-      needsVerification: true,
-    },
-    LATENCY.slow,
-  )
 }
 
 export async function requestPasswordReset(email) {
@@ -187,8 +178,7 @@ export function resetDemoData() {
   return true
 }
 
-export const demoCredentials = DEMO_CREDENTIALS
-export const apiBaseUrl = 'mock://local'
+export const apiBaseUrl = API_BASE_URL
 
 /* ------------------------------------------------------------------ */
 /* Reads                                                               */
@@ -200,7 +190,7 @@ export async function getAppData() {
     {
       user: state.user,
       accounts: state.accounts,
-      transactions: state.transactions,
+      transactions: visibleTransactions(state.transactions),
       beneficiaries: state.beneficiaries,
       cards: state.cards,
       notifications: state.notifications,
@@ -212,7 +202,7 @@ export async function getAppData() {
 
 export async function fetchTransactions(params = {}) {
   const { page = 1, pageSize = 10, accountId = 'all', ...filters } = params
-  const scoped = filterTransactions(getState().transactions, { ...filters, accountId })
+  const scoped = filterTransactions(visibleTransactions(getState().transactions), { ...filters, accountId })
   const total = scoped.length
   const pageCount = Math.max(1, Math.ceil(total / pageSize))
   const safePage = Math.min(Math.max(1, page), pageCount)
@@ -231,13 +221,13 @@ export async function fetchTransactions(params = {}) {
 }
 
 export async function fetchTransaction(id) {
-  const txn = getState().transactions.find((item) => item.id === id)
+  const txn = visibleTransactions(getState().transactions).find((item) => item.id === id)
   if (!txn) throw new ApiError('We could not find that transaction.', { code: 'not_found' })
   return settle(txn, LATENCY.normal)
 }
 
 export async function fetchRecentTransactions(limit = 5, accountId = 'all') {
-  const items = getState().transactions
+  const items = visibleTransactions(getState().transactions)
     .filter((txn) => accountId === 'all' || txn.accountId === accountId)
     .slice(0, limit)
   return settle(items, LATENCY.normal)
@@ -249,14 +239,14 @@ export async function fetchDashboardSummary({ accountId, days = 30 } = {}) {
   const since = new Date()
   since.setDate(since.getDate() - days)
   const window = inRange(
-    state.transactions.filter((txn) => txn.accountId === account.id),
+    visibleTransactions(state.transactions).filter((txn) => txn.accountId === account.id),
     since,
     new Date(),
   )
   const previousSince = new Date()
   previousSince.setDate(previousSince.getDate() - days * 2)
   const previousWindow = inRange(
-    state.transactions.filter((txn) => txn.accountId === account.id),
+    visibleTransactions(state.transactions).filter((txn) => txn.accountId === account.id),
     previousSince,
     since,
   )
@@ -268,8 +258,8 @@ export async function fetchDashboardSummary({ accountId, days = 30 } = {}) {
       previous: sumsFor(previousWindow),
       pending: window.filter((txn) => txn.status === 'pending').length,
       unreadNotifications: state.notifications.filter((item) => !item.read).length,
-      recent: state.transactions.filter((txn) => txn.accountId === account.id).slice(0, 6),
-      lastActiveAt: state.transactions[0]?.date ?? null,
+      recent: visibleTransactions(state.transactions).filter((txn) => txn.accountId === account.id).slice(0, 6),
+      lastActiveAt: visibleTransactions(state.transactions)[0]?.date ?? null,
     },
     LATENCY.normal,
   )
@@ -283,7 +273,7 @@ export async function fetchStatement({ accountId, from, to }) {
   const state = getState()
   const account = state.accounts.find((item) => item.id === accountId) ?? state.accounts[0]
   const scoped = inRange(
-    state.transactions.filter((txn) => txn.accountId === account.id),
+    visibleTransactions(state.transactions).filter((txn) => txn.accountId === account.id),
     from,
     to,
   ).sort((a, b) => new Date(a.date) - new Date(b.date))
@@ -418,7 +408,7 @@ function assertAmount(amount, { available, singleLimit, label = 'Amount', field 
   const fields = {}
   if (!value) fields[field] = `${label} is required`
   else if (value <= 0) fields[field] = `${label} must be greater than zero`
-  else if (singleLimit && value > singleLimit) fields[field] = `Above your per-transaction limit of ₦${singleLimit.toLocaleString('en-NG')}`
+  else if (singleLimit && value > singleLimit) fields[field] = `Above your per-transaction limit of ${formatCurrency(singleLimit)}`
   else if (available && value > available) fields[field] = 'Insufficient available balance'
   if (Object.keys(fields).length) {
     throw new ApiError('Please review the amount and try again.', { code: 'validation_error', fields })
@@ -466,7 +456,7 @@ export async function createTransfer(payload) {
   pushNotification({
     category: 'transaction',
     title: 'Transfer completed',
-    body: `Your transfer of ₦${amount.toLocaleString('en-NG')} to ${recipient.name} was successful.`,
+    body: `Your transfer of ${formatCurrency(amount)} to ${recipient.name} was successful.`,
     actionLabel: 'View transaction',
     actionPath: `/app/transactions/${transaction.id}`,
     important: true,
@@ -522,8 +512,8 @@ export async function createBillPayment(payload) {
     category: 'transaction',
     title: 'Bill payment successful',
     body: token
-      ? `${provider.short} payment of ₦${amount.toLocaleString('en-NG')} confirmed. Token: ${token}.`
-      : `${provider.name} payment of ₦${amount.toLocaleString('en-NG')} for ${payload.customerRef} was successful.`,
+      ? `${provider.short} payment of ${formatCurrency(amount)} confirmed. Token: ${token}.`
+      : `${provider.name} payment of ${formatCurrency(amount)} for ${payload.customerRef} was successful.`,
     actionLabel: 'View transaction',
     actionPath: `/app/transactions/${transaction.id}`,
   })
@@ -556,7 +546,7 @@ export async function createWithdrawal(payload) {
   pushNotification({
     category: 'transaction',
     title: 'Withdrawal processed',
-    body: `₦${amount.toLocaleString('en-NG')} withdrawal was approved at ${destination}.`,
+    body: `${formatCurrency(amount)} withdrawal was approved at ${destination}.`,
     actionLabel: 'View transaction',
     actionPath: `/app/transactions/${transaction.id}`,
   })
@@ -569,7 +559,7 @@ export async function createDeposit(payload) {
   const amount = Number(payload.amount)
   const fields = {}
   if (!amount || amount <= 0) fields.amount = 'Amount is required'
-  else if (amount < 500) fields.amount = 'Minimum top-up is ₦500'
+  else if (amount < 500) fields.amount = `Minimum top-up is ${formatCurrency(500)}`
   if (Object.keys(fields).length) {
     throw new ApiError('Please correct the highlighted fields.', { code: 'validation_error', fields })
   }
@@ -593,7 +583,7 @@ export async function createDeposit(payload) {
   pushNotification({
     category: 'transaction',
     title: 'Money added',
-    body: `₦${amount.toLocaleString('en-NG')} was added to your ${account.name} via ${method}.`,
+    body: `${formatCurrency(amount)} was added to your ${account.name} via ${method}.`,
     actionLabel: 'View transaction',
     actionPath: `/app/transactions/${transaction.id}`,
   })
@@ -848,8 +838,8 @@ export async function updateProfile(patch) {
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) fields.email = 'Enter a valid email address'
   }
   if (patch.phone !== undefined) {
-    const phone = String(patch.phone).replace(/\s/g, '')
-    if (phone && !/^\+?1?[-.\s]?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}$/.test(phone)) fields.phone = 'Enter a valid U.S. phone number'
+    const phone = String(patch.phone).trim()
+    if (phone && !isValidUsPhone(phone)) fields.phone = 'Enter a valid U.S. phone number'
   }
   if (patch.firstName !== undefined && String(patch.firstName).trim().length < 2) {
     fields.firstName = 'First name is too short'

@@ -82,7 +82,7 @@ export function BalanceCard({
           {switcherOpen && accounts.length > 1 ? (
             <ul
               role="listbox"
-              className="absolute left-0 top-full z-20 mt-2 w-64 animate-pop overflow-hidden rounded-card border border-ink-200 bg-white p-1.5 text-ink-900 shadow-pop"
+              className="absolute left-0 top-full z-20 mt-2 w-64 max-w-[calc(100vw-4rem)] animate-pop overflow-hidden rounded-card border border-ink-200 bg-white p-1.5 text-ink-900 shadow-pop"
             >
               {accounts.map((item) => (
                 <li key={item.id}>

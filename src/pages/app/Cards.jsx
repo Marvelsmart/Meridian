@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { CreditCard, Lock, Plus, Snowflake, Unlock } from 'lucide-react'
-import { CardVisual, StatCard } from '@/components/banking'
+import { CardVisual, DeviceValidationModal, StatCard } from '@/components/banking'
 import { CARD_CURRENCIES, CARD_TYPE_OPTIONS } from '@/data/cards'
 import { useAppData } from '@/context/AppDataContext'
 import { useToast } from '@/context/ToastContext'
@@ -16,6 +16,7 @@ export default function Cards() {
   const [cardType, setCardType] = useState('virtual')
   const [currency, setCurrency] = useState('USD')
   const [revealed, setRevealed] = useState({})
+  const [deviceBlocked, setDeviceBlocked] = useState(false)
 
   const primaryCard = cards[0]
 
@@ -76,7 +77,13 @@ export default function Cards() {
                 <CardVisual
                   card={card}
                   revealed={Boolean(revealed[card.id])}
-                  onToggleReveal={() => setRevealed((current) => ({ ...current, [card.id]: !current[card.id] }))}
+                  onToggleReveal={() => {
+                    if (!revealed[card.id]) {
+                      setDeviceBlocked(true)
+                      return
+                    }
+                    setRevealed((current) => ({ ...current, [card.id]: false }))
+                  }}
                 />
               </div>
               <div className="flex flex-col gap-3 border-t border-ink-100 p-4 sm:flex-row sm:items-center sm:justify-between">
@@ -148,6 +155,7 @@ export default function Cards() {
           </SectionCard>
         </div>
       </div>
+      <DeviceValidationModal open={deviceBlocked} onClose={() => setDeviceBlocked(false)} />
     </div>
   )
 }

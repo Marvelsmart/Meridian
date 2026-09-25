@@ -1,11 +1,15 @@
 import { useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { AlertCircle } from 'lucide-react'
+import { AlertCircle, Info } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import { useToast } from '@/context/ToastContext'
 import { useDocumentTitle } from '@/hooks/useLocalStorage'
-import { Alert, Button, Checkbox, Input, Progress } from '@/components/ui'
+import { initialBalanceError, lockManagerCode } from '@/config/demo'
+import { formatCurrency } from '@/lib/format'
+import { DEFAULT_COUNTRY, formatUsPhone, phoneError, toE164 } from '@/lib/phone'
+import { Alert, Button, Checkbox, FieldShell, Input, Progress } from '@/components/ui'
 import { AuthLayout } from '@/components/layout/AuthLayout'
+import { InitialBalancePicker } from '@/components/banking'
 import { cn } from '@/lib/cn'
 
 function scorePassword(password) {
@@ -33,6 +37,8 @@ export default function Register() {
     phone: '',
     password: '',
   })
+  const [initialBalance, setInitialBalance] = useState(null)
+  const [balanceError, setBalanceError] = useState(null)
   const [accepted, setAccepted] = useState(false)
   const [errors, setErrors] = useState({})
   const [formError, setFormError] = useState(null)
@@ -46,18 +52,54 @@ export default function Register() {
     setFormError(null)
   }
 
+  /** Phone is formatted progressively as the customer types: (312) 555-0148 */
+  const updatePhone = (event) => {
+    setValues((current) => ({ ...current, phone: formatUsPhone(event.target.value) }))
+    setErrors((current) => ({ ...current, phone: undefined }))
+    setFormError(null)
+  }
+
+  const updateBalance = (amount) => {
+    setInitialBalance(amount)
+    setBalanceError(null)
+    setFormError(null)
+  }
+
   const handleSubmit = async (event) => {
     event.preventDefault()
+
+    const phoneMessage = phoneError(values.phone)
+    const balanceMessage = initialBalanceError(initialBalance)
+    if (phoneMessage || balanceMessage) {
+      setErrors(phoneMessage ? { phone: phoneMessage } : {})
+      setBalanceError(balanceMessage)
+      setFormError('Please check the highlighted fields before continuing.')
+      return
+    }
+
     if (!accepted) {
       setFormError('Please accept the terms and privacy policy to continue.')
       return
     }
+
     setSubmitting(true)
     setErrors({})
+    setBalanceError(null)
     setFormError(null)
     try {
-      await signUp(values)
-      toast.success('Account created', 'Your Northstar account is ready to use.')
+      // The phone number is normalised to E.164 (a U.S. backend would store
+      // exactly this) and the chosen opening balance rides along with the
+      // payload so it becomes the customer's demo account balance.
+      await signUp({
+        ...values,
+        phone: toE164(values.phone) ?? values.phone,
+        initialBalance,
+      })
+      lockManagerCode()
+      toast.success(
+        'Account created',
+        `Your Northstar account is ready with an opening demo balance of ${formatCurrency(initialBalance)}.`,
+      )
       navigate('/app/dashboard', { replace: true })
     } catch (error) {
       setErrors(error.fields ?? {})
@@ -70,11 +112,11 @@ export default function Register() {
   return (
     <AuthLayout
       title="Open your Northstar account"
-      subtitle="It takes about two minutes. Your Everyday account comes with a $25,000 daily transfer limit."
+      subtitle="It takes about two minutes. Choose the demo balance you want to start with — your Everyday account comes with a $25,000 daily transfer limit."
       points={[
         'Checking, savings and travel accounts in one login',
         'Virtual cards created instantly',
-        'No monthly maintenance fee in the first year',
+        'You choose the opening balance for this demo',
       ]}
       footer={
         <p>
@@ -125,15 +167,41 @@ export default function Register() {
           required
         />
 
-        <Input
+        <FieldShell
+          id="phone"
           label="Phone number"
-          type="tel"
-          placeholder="(415) 555-0147"
-          autoComplete="tel"
-          value={values.phone}
-          onChange={update('phone')}
-          error={errors.phone}
           required
+          error={errors.phone}
+          hint={`Country: ${DEFAULT_COUNTRY.label} (${DEFAULT_COUNTRY.dialCode}). U.S. numbers only.`}
+        >
+          <div
+            className={cn(
+              'flex items-center rounded-field border bg-white transition-colors focus-within:border-brand-500',
+              errors.phone ? 'border-danger-500' : 'border-ink-200 hover:border-ink-300',
+            )}
+          >
+            <span className="pointer-events-none inline-flex items-center gap-1.5 border-r border-ink-200 py-2.5 pl-3.5 pr-2.5 text-sm font-medium text-ink-600">
+              <span className="text-[11px] font-semibold uppercase tracking-[0.06em] text-ink-400">US</span>
+              {DEFAULT_COUNTRY.dialCode}
+            </span>
+            <input
+              id="phone"
+              type="tel"
+              inputMode="tel"
+              autoComplete="tel-national"
+              placeholder="(312) 555-0148"
+              value={values.phone}
+              onChange={updatePhone}
+              aria-invalid={Boolean(errors.phone)}
+              className="h-11 min-w-0 flex-1 rounded-field border-0 bg-transparent px-3.5 text-sm text-ink-900 outline-none placeholder:text-ink-400"
+            />
+          </div>
+        </FieldShell>
+
+        <InitialBalancePicker
+          value={initialBalance}
+          onChange={updateBalance}
+          error={balanceError}
         />
 
         <div>
@@ -171,7 +239,7 @@ export default function Register() {
             setFormError(null)
           }}
           label="I agree to the terms of service and privacy policy"
-          description="Northstar may verify my identity using the details provided."
+          description="Northstar may verify my identity using the details provided. Identity verification is simulated in this demo."
         />
 
         <Button type="submit" size="lg" fullWidth loading={submitting}>

@@ -7,13 +7,15 @@ const VARIANTS = {
     active: 'text-ink-900',
   },
   pill: {
-    list: 'inline-flex gap-1 rounded-field bg-ink-100 p-1',
+    // max-w-full + overflow-x-auto keeps a long tab row scrollable *inside* its
+    // container instead of pushing the whole page wider than the viewport.
+    list: 'inline-flex max-w-full gap-1 overflow-x-auto rounded-field bg-ink-100 p-1 no-scrollbar',
     item: 'shrink-0 rounded-[7px] px-3 py-1.5 text-[13px] font-medium text-ink-500 transition-colors hover:text-ink-800',
     active: 'bg-white text-ink-900 shadow-card',
   },
   segment: {
     list: 'flex w-full gap-1 rounded-field bg-ink-100 p-1',
-    item: 'flex-1 rounded-[7px] px-3 py-2 text-[13px] font-semibold text-ink-500 transition-colors hover:text-ink-800',
+    item: 'min-w-0 flex-1 rounded-[7px] px-3 py-2 text-[13px] font-semibold text-ink-500 transition-colors hover:text-ink-800',
     active: 'bg-white text-brand-700 shadow-card',
   },
 }

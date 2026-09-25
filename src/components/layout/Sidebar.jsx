@@ -1,11 +1,11 @@
 import { NavLink } from 'react-router-dom'
-import { LifeBuoy, LogOut, ShieldCheck } from 'lucide-react'
+import { LogOut, ShieldCheck } from 'lucide-react'
 import { cn } from '@/lib/cn'
-import { BRAND } from '@/lib/constants'
 import { NAV_GROUPS } from '@/config/navigation'
 import { useAppData } from '@/context/AppDataContext'
 import { useAuth } from '@/context/AuthContext'
 import { Avatar } from '@/components/ui'
+import { SupportCard } from '@/components/banking'
 import { Logo } from './Logo'
 
 /** Desktop sidebar: brand, grouped navigation, support + account footer. */
@@ -70,15 +70,7 @@ export function Sidebar({ className = '' }) {
       </nav>
 
       <div className="shrink-0 border-t border-ink-100 p-3">
-        <div className="rounded-card bg-ink-50 p-3.5">
-          <p className="flex items-center gap-2 text-[12.5px] font-semibold text-ink-800">
-            <LifeBuoy className="size-4 text-brand-600" aria-hidden="true" />
-            Need help?
-          </p>
-          <p className="mt-1 text-[12px] leading-5 text-ink-500">
-            Reach us on {BRAND.supportPhone} or {BRAND.supportEmail}.
-          </p>
-        </div>
+        <SupportCard variant="compact" title="Need help?" description="Chat with Support on WhatsApp." />
 
         <div className="mt-3 flex items-center gap-3 rounded-card p-2">
           <Avatar name={`${user?.firstName ?? ''} ${user?.lastName ?? ''}`} size="sm" tone="brand" />

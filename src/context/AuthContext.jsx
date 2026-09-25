@@ -4,12 +4,17 @@ import * as api from '@/lib/api'
 const AuthContext = createContext(null)
 
 /**
- * Session state only — no real authentication is performed in this phase.
- * `lib/api.js` validates the credentials against the mock store and returns a
- * token that we persist so a refresh keeps the user signed in.
+ * Session state for the backend-issued JWT returned by `lib/api.js`.
  */
 export function AuthProvider({ children }) {
-  const [session, setSession] = useState(() => api.currentSession())
+  const [session, setSession] = useState(() => {
+    const stored = api.currentSession()
+    if (stored?.token?.startsWith('mdn_')) {
+      api.persistSession(null)
+      return null
+    }
+    return stored
+  })
   const [status, setStatus] = useState('idle')
   const [error, setError] = useState(null)
 

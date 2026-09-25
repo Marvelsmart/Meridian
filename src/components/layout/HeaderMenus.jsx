@@ -30,7 +30,7 @@ export function NotificationsMenu({ notifications = [], unreadCount = 0, onRead,
       </button>
 
       {open ? (
-        <div className="absolute right-0 top-full z-40 mt-2 w-[340px] animate-pop overflow-hidden rounded-card border border-ink-200 bg-white shadow-pop sm:w-[380px]">
+        <div className="absolute right-0 top-full z-40 mt-2 w-[min(340px,calc(100vw-2rem))] animate-pop overflow-hidden rounded-card border border-ink-200 bg-white shadow-pop sm:w-[380px]">
           <div className="flex items-center justify-between border-b border-ink-100 px-4 py-3">
             <p className="text-[13.5px] font-semibold text-ink-900">Notifications</p>
             {unreadCount ? (

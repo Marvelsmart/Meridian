@@ -8,11 +8,13 @@ export function useMoneyFlow(open) {
   const [step, setStep] = useState('form')
   const [error, setError] = useState(null)
   const [result, setResult] = useState(null)
+  const [deviceBlocked, setDeviceBlocked] = useState(false)
 
   useEffect(() => {
     if (open) {
       setStep('form')
       setError(null)
+      setDeviceBlocked(false)
       setResult(null)
     }
   }, [open])
@@ -26,11 +28,12 @@ export function useMoneyFlow(open) {
       setStep('success')
       return response
     } catch (err) {
+      setDeviceBlocked(err.code === 'device_not_validated')
       setError(err)
       setStep('form')
       return null
     }
   }
 
-  return { step, setStep, error, setError, result, run, isForm: step === 'form', isProcessing: step === 'processing', isSuccess: step === 'success' }
+  return { step, setStep, error, setError, result, run, deviceBlocked, setDeviceBlocked, isForm: step === 'form', isProcessing: step === 'processing', isSuccess: step === 'success' }
 }
