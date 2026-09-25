@@ -15,6 +15,7 @@ export default function ResetPassword() {
   const [params] = useSearchParams()
   const [values, setValues] = useState({
     code: params.get('code') ?? '',
+    email: params.get('email') ?? '',
     password: '',
     confirmPassword: '',
   })
