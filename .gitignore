@@ -12,3 +12,5 @@ yarn-error.log*
 .env.*
 !.env.example
 coverage
+.vercel
+.env*
