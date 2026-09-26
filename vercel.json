@@ -6,6 +6,24 @@
   "functions": {
     "api/[...path].js": {
       "maxDuration": 30
+    },
+    "api/auth/[...path].js": {
+      "maxDuration": 30
+    },
+    "api/transactions/[...path].js": {
+      "maxDuration": 30
+    },
+    "api/beneficiaries/[...path].js": {
+      "maxDuration": 30
+    },
+    "api/cards/[...path].js": {
+      "maxDuration": 30
+    },
+    "api/devices/[...path].js": {
+      "maxDuration": 30
+    },
+    "api/notifications/[...path].js": {
+      "maxDuration": 30
     }
   }
 }

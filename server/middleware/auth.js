@@ -10,7 +10,7 @@ export async function requireAuth(req, res, next) {
     const user = await User.findById(payload.sub).lean()
     if (!user) return res.status(401).json({ error: 'Authentication required' })
     req.user = user
-    req.deviceId = req.headers['x-device-id'] || `session:${payload.jti || payload.sub}`
+    req.deviceId = payload.jti || req.headers['x-device-id'] || `session:${payload.sub}`
     return next()
   } catch { return res.status(401).json({ error: 'Invalid or expired authentication token' }) }
 }

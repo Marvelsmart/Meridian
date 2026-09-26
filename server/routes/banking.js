@@ -14,6 +14,11 @@ const publicCard = (card) => safeCard(card)
 const publicUser = (user) => { const { passwordHash, transactionPinHash, ...safe } = user.toObject ? user.toObject() : user; return safe }
 const idString = (value) => value?._id ? String(value._id) : String(value)
 const normalizeTransaction = (transaction) => ({ ...transaction, id: idString(transaction), accountId: transaction.account ? idString(transaction.account) : transaction.accountId, date: transaction.date ?? transaction.createdAt })
+const normalizeTransactionForAccount = (transaction, accountId) => {
+  const normalized = normalizeTransaction(transaction)
+  if (transaction.visibility === 'shared' && accountId) normalized.accountId = String(accountId)
+  return normalized
+}
 const normalizeAccount = (account) => ({ ...account, id: idString(account) })
 
 router.get('/app-data', async (req, res) => {
@@ -22,15 +27,22 @@ router.get('/app-data', async (req, res) => {
     Account.find({ owner }).lean(), Transaction.find({ owner, visibility: 'private' }).sort({ date: -1 }).lean(), Transaction.find({ visibility: 'shared' }).sort({ date: -1 }).lean(),
     Beneficiary.find({ owner }).lean(), Card.find({ owner }).select('+panCiphertext').lean(), Notification.find({ owner }).sort({ createdAt: -1 }).lean(), Device.find({ owner }).lean(),
   ])
-  res.json({ user: publicUser(req.user), accounts: accounts.map(normalizeAccount), transactions: [...privateTransactions, ...sharedTransactions].map(normalizeTransaction), beneficiaries, cards: cards.map(publicCard), notifications, sessions: devices })
+  const primaryAccountId = (accounts.find((account) => account.primary) ?? accounts[0])?._id
+  res.json({ user: publicUser(req.user), accounts: accounts.map(normalizeAccount), transactions: [...privateTransactions, ...sharedTransactions].map((transaction) => normalizeTransactionForAccount(transaction, primaryAccountId)), beneficiaries, cards: cards.map(publicCard), notifications, sessions: devices })
 })
 
 router.get('/accounts', async (req, res) => res.json((await Account.find({ owner: req.user._id }).lean()).map(normalizeAccount)))
 router.get('/transactions', async (req, res) => {
   const filter = { $or: [{ visibility: 'shared' }, { owner: req.user._id, visibility: 'private' }] }
-  const items = (await Transaction.find(filter).sort({ date: -1 }).lean()).map(normalizeTransaction); res.json({ items, total: items.length, page: 1, pageSize: items.length, pageCount: 1 })
+  const [transactions, primaryAccount] = await Promise.all([Transaction.find(filter).sort({ date: -1 }).lean(), Account.findOne({ owner: req.user._id, primary: true }).select('_id').lean()])
+  const items = transactions.map((transaction) => normalizeTransactionForAccount(transaction, primaryAccount?._id)); res.json({ items, total: items.length, page: 1, pageSize: items.length, pageCount: 1 })
 })
-router.get('/transactions/:transactionId', async (req, res) => { const item = await Transaction.findOne({ _id: req.params.transactionId, $or: [{ visibility: 'shared' }, { owner: req.user._id }] }).lean(); if (!item) return res.status(404).json({ error: 'Transaction not found' }); res.json(normalizeTransaction(item)) })
+router.get('/transactions/:transactionId', async (req, res) => {
+  const item = await Transaction.findOne({ _id: req.params.transactionId, $or: [{ visibility: 'shared' }, { owner: req.user._id }] }).lean()
+  if (!item) return res.status(404).json({ error: 'Transaction not found' })
+  const primaryAccount = item.visibility === 'shared' ? await Account.findOne({ owner: req.user._id, primary: true }).select('_id').lean() : null
+  res.json(normalizeTransactionForAccount(item, primaryAccount?._id))
+})
 router.get('/notifications', async (req, res) => res.json(await Notification.find({ owner: req.user._id }).sort({ createdAt: -1 }).lean()))
 router.get('/beneficiaries', async (req, res) => res.json(await Beneficiary.find({ owner: req.user._id }).lean()))
 router.post('/beneficiaries', async (req, res) => res.status(201).json(await Beneficiary.create({ ...req.body, owner: req.user._id })))
@@ -70,6 +82,10 @@ router.post('/notifications/read-all', async (req, res) => { await Notification.
 router.delete('/notifications/:id', async (req, res) => { await Notification.deleteOne({ _id: req.params.id, owner: req.user._id }); res.json({ id: req.params.id }) })
 router.patch('/profile', async (req, res) => { const user = await User.findByIdAndUpdate(req.user._id, { $set: req.body }, { new: true }); res.json(publicUser(user)) })
 router.patch('/security', async (req, res) => { const user = await User.findByIdAndUpdate(req.user._id, { $set: { security: req.body } }, { new: true }); res.json(user.security) })
-router.get('/statements', async (req, res) => { const filter = { $or: [{ visibility: 'shared' }, { owner: req.user._id, visibility: 'private' }] }; const items = (await Transaction.find(filter).sort({ date: 1 }).lean()).map(normalizeTransaction); res.json({ transactions: items, generatedAt: new Date().toISOString() }) })
+router.get('/statements', async (req, res) => {
+  const filter = { $or: [{ visibility: 'shared' }, { owner: req.user._id, visibility: 'private' }] }
+  const [transactions, primaryAccount] = await Promise.all([Transaction.find(filter).sort({ date: 1 }).lean(), Account.findOne({ owner: req.user._id, primary: true }).select('_id').lean()])
+  const items = transactions.map((transaction) => normalizeTransactionForAccount(transaction, primaryAccount?._id)); res.json({ transactions: items, generatedAt: new Date().toISOString() })
+})
 
 export { router as bankingRouter }
