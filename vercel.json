@@ -10,31 +10,16 @@
     "api/auth/[...path].js": {
       "maxDuration": 30
     },
-    "api/auth/password-reset/request.js": {
-      "maxDuration": 30
-    },
-    "api/auth/password-reset/confirm.js": {
-      "maxDuration": 30
-    },
     "api/transactions/[...path].js": {
       "maxDuration": 30
     },
     "api/beneficiaries/[...path].js": {
       "maxDuration": 30
     },
-    "api/beneficiaries/[id]/favourite.js": {
-      "maxDuration": 30
-    },
     "api/cards/[...path].js": {
       "maxDuration": 30
     },
-    "api/cards/[id]/freeze.js": {
-      "maxDuration": 30
-    },
     "api/devices/[...path].js": {
-      "maxDuration": 30
-    },
-    "api/devices/[deviceId]/validate.js": {
       "maxDuration": 30
     },
     "api/notifications/[...path].js": {
