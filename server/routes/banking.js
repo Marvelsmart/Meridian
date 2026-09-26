@@ -5,6 +5,7 @@ import { Account, Beneficiary, Biller, BillPayment, Card, Device, Notification, 
 import { requireAuth } from '../middleware/auth.js'
 import { requireValidatedDevice } from '../middleware/device.js'
 import { decryptSecret } from '../security/crypto.js'
+import { ensureDemoUserData } from '../seed-demo-transactions.js'
 
 const router = Router(); router.use(requireAuth)
 const id = (value) => value && String(value)
@@ -23,8 +24,10 @@ const normalizeAccount = (account) => ({ ...account, id: idString(account) })
 
 router.get('/app-data', async (req, res) => {
   const owner = req.user._id
-  const [accounts, privateTransactions, sharedTransactions, beneficiaries, cards, notifications, devices] = await Promise.all([
-    Account.find({ owner }).lean(), Transaction.find({ owner, visibility: 'private' }).sort({ date: -1 }).lean(), Transaction.find({ visibility: 'shared' }).sort({ date: -1 }).lean(),
+  const accounts = await Account.find({ owner }).lean()
+  await ensureDemoUserData(req.user, accounts)
+  const [privateTransactions, sharedTransactions, beneficiaries, cards, notifications, devices] = await Promise.all([
+    Transaction.find({ owner, visibility: 'private' }).sort({ date: -1 }).lean(), Transaction.find({ visibility: 'shared' }).sort({ date: -1 }).lean(),
     Beneficiary.find({ owner }).lean(), Card.find({ owner }).select('+panCiphertext').lean(), Notification.find({ owner }).sort({ createdAt: -1 }).lean(), Device.find({ owner }).lean(),
   ])
   const primaryAccountId = (accounts.find((account) => account.primary) ?? accounts[0])?._id
