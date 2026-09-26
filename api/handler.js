@@ -1,0 +1,1 @@
+export { handler as default } from '../server/vercel.js'

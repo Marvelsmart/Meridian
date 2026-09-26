@@ -12,6 +12,15 @@ let databaseConnection
 export async function handler(request, response) {
   databaseConnection ??= connectDatabase(env.mongoUri)
   await databaseConnection
-  if (!request.url.startsWith('/api')) request.url = `/api${request.url.startsWith('/') ? '' : '/'}${request.url}`
+  const requestUrl = new URL(request.url, 'http://localhost')
+  const rewrittenPath = requestUrl.searchParams.get('path')
+  if (rewrittenPath) {
+    requestUrl.pathname = `/api/${rewrittenPath.replace(/^\/+/, '')}`
+    requestUrl.searchParams.delete('path')
+    request.url = `${requestUrl.pathname}${requestUrl.search}`
+  } else if (!requestUrl.pathname.startsWith('/api')) {
+    requestUrl.pathname = `/api${requestUrl.pathname.startsWith('/') ? '' : '/'}${requestUrl.pathname}`
+    request.url = `${requestUrl.pathname}${requestUrl.search}`
+  }
   return app(request, response)
 }

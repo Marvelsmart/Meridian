@@ -4,8 +4,14 @@
   "buildCommand": "npm run build",
   "outputDirectory": "./dist",
   "functions": {
-    "api/**/*.js": {
+    "api/handler.js": {
       "maxDuration": 30
     }
-  }
+  },
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/handler?path=$1"
+    }
+  ]
 }
