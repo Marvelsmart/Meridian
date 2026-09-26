@@ -7,13 +7,15 @@ import { managerCodeForRegistration } from '@/config/demo'
 export const LATENCY = { fast: 0, normal: 0, slow: 0 }
 const API_BASE_URL = import.meta.env.VITE_API_URL || '/api'
 const DEVICE_KEY = 'northstarbank.device-id'
+const SESSION_EXPIRED_EVENT = 'northstar:session-expired'
 
 export class ApiError extends Error {
-  constructor(message, { code = 'api_error', fields = null } = {}) {
+  constructor(message, { code = 'api_error', fields = null, status = null } = {}) {
     super(message)
     this.name = 'ApiError'
     this.code = code
     this.fields = fields
+    this.status = status
   }
 }
 
@@ -68,9 +70,14 @@ async function requestBackend(path, options = {}) {
   }
   const body = await response.json().catch(() => ({}))
   if (!response.ok) {
+    if (response.status === 401 && session?.token) {
+      persistSession(null)
+      if (typeof window !== 'undefined') window.dispatchEvent(new Event(SESSION_EXPIRED_EVENT))
+    }
     throw new ApiError(body.message ?? body.error ?? 'The request could not be completed.', {
       code: body.code ?? 'api_error',
       fields: body.fields ?? null,
+      status: response.status,
     })
   }
   return body
@@ -98,6 +105,7 @@ export async function logout() {
 
 export function currentSession() { return readStorage(STORAGE_KEYS.auth, null) }
 export function persistSession(session) { session ? writeStorage(STORAGE_KEYS.auth, session) : removeStorage(STORAGE_KEYS.auth) }
+export async function validateSession() { return requestBackend('/auth/me') }
 export function resetDemoData() { removeStorage(STORAGE_KEYS.auth); removeStorage(STORAGE_KEYS.prefs); return true }
 export const apiBaseUrl = API_BASE_URL
 

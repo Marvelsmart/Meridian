@@ -1,7 +1,8 @@
-import { createContext, useCallback, useContext, useMemo, useState } from 'react'
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import * as api from '@/lib/api'
 
 const AuthContext = createContext(null)
+const SESSION_EXPIRED_EVENT = 'northstar:session-expired'
 
 /**
  * Session state for the backend-issued JWT returned by `lib/api.js`.
@@ -17,6 +18,38 @@ export function AuthProvider({ children }) {
   })
   const [status, setStatus] = useState('idle')
   const [error, setError] = useState(null)
+
+  useEffect(() => {
+    let active = true
+    const clearSession = () => {
+      api.persistSession(null)
+      setSession(null)
+      setError(null)
+      setStatus('idle')
+    }
+
+    window.addEventListener(SESSION_EXPIRED_EVENT, clearSession)
+    if (api.currentSession()?.token) {
+      setStatus('checking')
+      api.validateSession()
+        .then(({ user }) => {
+          if (active) {
+            setSession((current) => current ? { ...current, user: user ?? current.user } : current)
+            setStatus('idle')
+          }
+        })
+        .catch((err) => {
+          if (!active) return
+          if (err.status === 401) clearSession()
+          else setStatus('idle')
+        })
+    }
+
+    return () => {
+      active = false
+      window.removeEventListener(SESSION_EXPIRED_EVENT, clearSession)
+    }
+  }, [])
 
   const signIn = useCallback(async (credentials) => {
     setStatus('loading')
@@ -68,6 +101,7 @@ export function AuthProvider({ children }) {
       user: session?.user ?? null,
       status,
       error,
+      isCheckingSession: status === 'checking',
       isAuthenticated: Boolean(session?.token),
       signIn,
       signUp,

@@ -1,12 +1,14 @@
 import { Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
 import { isManagerCodeUnlocked } from '@/config/demo'
+import { LoadingState } from '@/components/ui/States'
 
 /** Redirects unauthenticated visitors to sign-in, remembering the destination. */
 export function ProtectedRoute({ children }) {
-  const { isAuthenticated } = useAuth()
+  const { isAuthenticated, isCheckingSession } = useAuth()
   const location = useLocation()
 
+  if (isCheckingSession) return <LoadingState label="Checking your session" />
   if (!isAuthenticated) {
     return <Navigate to="/login" replace state={{ from: `${location.pathname}${location.search}` }} />
   }
@@ -15,7 +17,8 @@ export function ProtectedRoute({ children }) {
 
 /** Keeps signed-in users out of the auth pages. */
 export function PublicOnlyRoute({ children }) {
-  const { isAuthenticated } = useAuth()
+  const { isAuthenticated, isCheckingSession } = useAuth()
+  if (isCheckingSession) return <LoadingState label="Checking your session" />
   if (isAuthenticated) return <Navigate to="/app/dashboard" replace />
   return children
 }
