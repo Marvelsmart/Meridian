@@ -48,11 +48,13 @@ export function CopyButton({ value, label = 'Copy', copiedLabel = 'Copied', clas
 
 export function DetailRow({ label, value, className = '', align = 'left', mono = false }) {
   return (
-    <div className={cn('flex items-start justify-between gap-4 py-2.5', className)}>
+    <div className={cn('flex items-start justify-between gap-3 py-2.5 sm:gap-4', className)}>
       <dt className="shrink-0 text-[13px] text-ink-500">{label}</dt>
       <dd
         className={cn(
-          'min-w-0 text-right text-[13px] font-medium text-ink-900',
+          // Long references, tokens and account numbers wrap instead of pushing
+          // the receipt wider than the modal.
+          'wrap-anywhere min-w-0 text-right text-[13px] font-medium text-ink-900',
           align === 'left' && 'text-left',
           mono && 'font-mono text-[12.5px]',
         )}

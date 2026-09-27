@@ -18,9 +18,12 @@ export function CardVisual({ card, revealed = false, onToggleReveal = null, clas
   return (
     <div
       className={cn(
-        'relative overflow-hidden rounded-card p-5 text-white shadow-pop',
+        'relative overflow-hidden rounded-card p-4 text-white shadow-pop sm:p-5',
         SURFACES[card.color] ?? SURFACES.ink,
-        compact ? 'h-[168px]' : 'h-[200px]',
+        // `min-h` instead of a fixed height: the face keeps its proportions but
+        // can grow a few pixels on a 320px phone rather than clipping the
+        // holder/expiry row (the card is an `overflow-hidden` surface).
+        compact ? 'min-h-[168px]' : 'min-h-[200px]',
         className,
       )}
     >
@@ -29,12 +32,12 @@ export function CardVisual({ card, revealed = false, onToggleReveal = null, clas
         aria-hidden="true"
       />
 
-      <div className="relative flex items-start justify-between">
-        <div>
-          <p className="text-[12px] font-medium text-white/60">{card.nickname}</p>
-          <p className="mt-0.5 text-[13px] font-semibold">{card.type} card</p>
+      <div className="relative flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="truncate text-[12px] font-medium text-white/70">{card.nickname}</p>
+          <p className="mt-0.5 truncate text-[13px] font-semibold">{card.type} card</p>
         </div>
-        <div className="flex items-center gap-1.5">
+        <div className="flex shrink-0 items-center gap-1.5">
           <span className={cn('rounded-full px-2.5 py-1 text-[11px] font-semibold', meta.className)}>{meta.label}</span>
           {onToggleReveal ? (
             <IconButton
@@ -55,22 +58,22 @@ export function CardVisual({ card, revealed = false, onToggleReveal = null, clas
         {card.contactless ? <Nfc className="size-4 text-white/70" aria-hidden="true" /> : null}
       </div>
 
-      <p className="relative mt-4 text-[17px] font-medium tracking-[0.14em]">
+      <p className="relative mt-4 text-[clamp(0.9375rem,4.4vw,1.0625rem)] font-medium tracking-[0.14em]">
         {revealed ? formatCardNumber(card.number) : card.maskedNumber}
       </p>
 
-      <div className="relative mt-4 flex items-end justify-between gap-4">
+      <div className="relative mt-4 flex flex-wrap items-end justify-between gap-x-4 gap-y-2">
         <div className="min-w-0">
-          <p className="text-[10.5px] uppercase tracking-[0.1em] text-white/50">Card holder</p>
+          <p className="text-[10.5px] uppercase tracking-[0.1em] text-white/60">Card holder</p>
           <p className="truncate text-[12.5px] font-medium">{card.holderName}</p>
         </div>
         <div className="text-right">
-          <p className="text-[10.5px] uppercase tracking-[0.1em] text-white/50">Expires</p>
+          <p className="text-[10.5px] uppercase tracking-[0.1em] text-white/60">Expires</p>
           <p className="text-[12.5px] font-medium">{formatCardExpiry(card.expiry)}</p>
         </div>
         {revealed ? (
           <div className="text-right">
-            <p className="text-[10.5px] uppercase tracking-[0.1em] text-white/50">CVV</p>
+            <p className="text-[10.5px] uppercase tracking-[0.1em] text-white/60">CVV</p>
             <p className="text-[12.5px] font-medium">{card.cvv}</p>
           </div>
         ) : null}

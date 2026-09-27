@@ -10,7 +10,10 @@ export function PublicLayout() {
   return (
     <div className="min-h-screen bg-white">
       <header className="sticky top-0 z-40 border-b border-ink-200 bg-white/90 backdrop-blur">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
+        {/* One calm row on tablet/desktop; on the narrowest phones the brand and
+            the two calls to action wrap onto their own lines instead of being
+            squeezed or clipped. */}
+        <div className="mx-auto flex min-h-16 max-w-6xl flex-wrap items-center justify-between gap-x-3 gap-y-2 px-4 py-2.5 sm:gap-x-4 sm:px-6 sm:py-0">
           <Logo />
           <nav className="hidden items-center gap-7 text-[13.5px] font-medium text-ink-600 md:flex">
             <a href="#features" className="transition hover:text-ink-900">
@@ -26,7 +29,7 @@ export function PublicLayout() {
               Support
             </a>
           </nav>
-          <div className="flex items-center gap-2">
+          <div className="ml-auto flex shrink-0 items-center gap-2">
             <Button variant="ghost" size="sm" to="/login">
               Sign in
             </Button>

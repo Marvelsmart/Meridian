@@ -22,26 +22,26 @@ export function MobileNav({ onMore, className = '' }) {
 
           if (isMore) {
             return (
-              <li key={item.label} className="flex">
+              <li key={item.label} className="flex min-w-0">
                 <button
                   type="button"
                   onClick={onMore}
-                  className="flex flex-1 flex-col items-center gap-1 py-2.5 text-ink-500 transition active:bg-ink-50"
+                  className="flex min-w-0 flex-1 flex-col items-center gap-1 px-1 py-2 text-ink-500 transition active:bg-ink-50"
                 >
-                  <Icon className="size-[21px]" aria-hidden="true" />
-                  <span className="text-[10.5px] font-medium">{item.label}</span>
+                  <Icon className="size-[21px] shrink-0" aria-hidden="true" />
+                  <span className="max-w-full truncate text-[11px] font-medium leading-4">{item.label}</span>
                 </button>
               </li>
             )
           }
 
           return (
-            <li key={item.to} className="flex">
+            <li key={item.to} className="flex min-w-0">
               <NavLink
                 to={item.to}
                 className={({ isActive }) =>
                   cn(
-                    'flex flex-1 flex-col items-center gap-1 py-2.5 transition active:bg-ink-50',
+                    'flex min-w-0 flex-1 flex-col items-center gap-1 px-1 py-2 transition active:bg-ink-50',
                     isActive ? 'text-brand-700' : 'text-ink-500',
                   )
                 }
@@ -51,18 +51,23 @@ export function MobileNav({ onMore, className = '' }) {
                     <>
                       <span
                         className={cn(
-                          'flex size-10 -mt-3 items-center justify-center rounded-full shadow-pop transition',
+                          'flex size-10 shrink-0 -mt-3 items-center justify-center rounded-full shadow-pop transition',
                           isActive ? 'bg-brand-700' : 'bg-brand-600',
                         )}
                       >
                         <Icon className="size-5 text-white" aria-hidden="true" />
                       </span>
-                      <span className="text-[10.5px] font-semibold text-ink-700">{item.label}</span>
+                      <span className="max-w-full truncate text-[11px] font-semibold leading-4 text-ink-700">{item.label}</span>
                     </>
                   ) : (
                     <>
-                      <Icon className={cn('size-[21px]', isActive && 'stroke-[2.4]')} aria-hidden="true" />
-                      <span className={cn('text-[10.5px]', isActive ? 'font-semibold' : 'font-medium')}>
+                      <Icon className={cn('size-[21px] shrink-0', isActive && 'stroke-[2.4]')} aria-hidden="true" />
+                      <span
+                        className={cn(
+                          'max-w-full truncate text-[11px] leading-4',
+                          isActive ? 'font-semibold' : 'font-medium',
+                        )}
+                      >
                         {item.label}
                       </span>
                     </>

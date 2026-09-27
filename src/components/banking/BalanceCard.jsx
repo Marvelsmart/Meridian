@@ -49,7 +49,7 @@ export function BalanceCard({
   }
 
   return (
-    <div className={cn('relative overflow-hidden rounded-card bg-ink-900 p-5 text-white shadow-pop sm:p-6', className)}>
+    <div className={cn('relative overflow-hidden rounded-card bg-ink-900 p-4 text-white shadow-pop sm:p-6', className)}>
       <div
         className="pointer-events-none absolute -right-16 -top-24 size-56 rounded-full bg-brand-600/20 blur-2xl"
         aria-hidden="true"
@@ -129,11 +129,12 @@ export function BalanceCard({
       </div>
 
       <div className="relative mt-6">
-        <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-white/50">Available balance</p>
-        <p className="amount mt-1.5 text-[30px] font-semibold leading-none sm:text-[34px]">
+        <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-white/60">Available balance</p>
+        {/* Fluid hero figure: full 34px on desktop, comfortably inside a 320px screen on phones. */}
+        <p className="amount mt-1.5 text-[clamp(1.5rem,8vw,2.125rem)] font-semibold leading-none">
           {hidden ? '$ ••••••••' : formatCurrency(account.available)}
         </p>
-        <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[12.5px] text-white/60">
+        <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[12.5px] text-white/70">
           <span>
             Account{' '}
             <span className="amount font-medium text-white/90">
@@ -153,24 +154,24 @@ export function BalanceCard({
       </div>
 
       <div className="relative mt-6 grid grid-cols-2 gap-3 border-t border-white/10 pt-4">
-        <div className="flex items-center gap-2.5">
-          <span className="flex size-8 items-center justify-center rounded-full bg-success-500/15 text-success-500">
+        <div className="flex min-w-0 items-center gap-2.5">
+          <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-success-500/15 text-success-500 sm:size-8">
             <ArrowDownLeft className="size-4" aria-hidden="true" />
           </span>
-          <div>
-            <p className="text-[11.5px] text-white/55">Money in · 30d</p>
-            <p className="amount text-[13.5px] font-semibold">
+          <div className="min-w-0">
+            <p className="text-[11.5px] text-white/65">Money in · 30d</p>
+            <p className="amount text-[clamp(0.75rem,3.4vw,0.84rem)] font-semibold">
               {hidden ? '$••••' : formatCurrency(summary?.credits ?? 0)}
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-2.5">
-          <span className="flex size-8 items-center justify-center rounded-full bg-white/10 text-white/80">
+        <div className="flex min-w-0 items-center gap-2.5">
+          <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-white/10 text-white/85 sm:size-8">
             <ArrowUpRight className="size-4" aria-hidden="true" />
           </span>
-          <div>
-            <p className="text-[11.5px] text-white/55">Money out · 30d</p>
-            <p className="amount text-[13.5px] font-semibold">
+          <div className="min-w-0">
+            <p className="text-[11.5px] text-white/65">Money out · 30d</p>
+            <p className="amount text-[clamp(0.75rem,3.4vw,0.84rem)] font-semibold">
               {hidden ? '$••••' : formatCurrency(summary?.debits ?? 0)}
             </p>
           </div>

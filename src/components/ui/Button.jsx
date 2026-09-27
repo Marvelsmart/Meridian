@@ -4,7 +4,7 @@ import { Loader2 } from 'lucide-react'
 import { cn } from '@/lib/cn'
 
 const BASE =
-  'inline-flex items-center justify-center font-semibold transition-colors duration-150 select-none disabled:pointer-events-none disabled:opacity-50'
+  'inline-flex min-w-0 max-w-full items-center justify-center font-semibold transition-colors duration-150 select-none disabled:pointer-events-none disabled:opacity-50'
 
 const VARIANTS = {
   primary: 'bg-brand-600 text-white hover:bg-brand-700 active:bg-brand-800 shadow-[0_1px_2px_rgba(18,24,34,0.10)]',
@@ -17,7 +17,9 @@ const VARIANTS = {
 }
 
 const SIZES = {
-  sm: 'h-8 gap-1.5 rounded-lg px-3 text-[13px]',
+  // `sm` is a 36px target: compact enough for desktop toolbars, still reliably
+  // tappable on a phone (the old 32px was below every touch guideline).
+  sm: 'h-9 gap-1.5 rounded-lg px-3 text-[13px]',
   md: 'h-10 gap-2 rounded-field px-4 text-sm',
   lg: 'h-12 gap-2 rounded-field px-5 text-[15px]',
 }
@@ -86,7 +88,7 @@ export const Button = forwardRef(function Button(
 })
 
 const ICON_SIZES = {
-  sm: 'size-8 rounded-lg',
+  sm: 'size-9 rounded-lg',
   md: 'size-10 rounded-field',
   lg: 'size-12 rounded-field',
 }

@@ -3,7 +3,8 @@ import { cn } from '@/lib/cn'
 /** Minimal table primitives so every data table shares the same rhythm. */
 export function Table({ children, className = '' }) {
   return (
-    <div className="w-full overflow-x-auto">
+    // Only the table scrolls sideways on small screens — never the whole page.
+    <div className="scroll-x w-full">
       <table className={cn('w-full border-collapse text-left', className)}>{children}</table>
     </div>
   )
@@ -37,7 +38,7 @@ export function TH({ children, className = '', align = 'left' }) {
     <th
       scope="col"
       className={cn(
-        'whitespace-nowrap px-4 py-3 text-[11px] font-semibold uppercase tracking-[0.06em] text-ink-500',
+        'whitespace-nowrap px-3 py-3 text-[11px] font-semibold uppercase tracking-[0.06em] text-ink-500 sm:px-4',
         align === 'right' && 'text-right',
         align === 'center' && 'text-center',
         className,
@@ -52,7 +53,7 @@ export function TD({ children, className = '', align = 'left' }) {
   return (
     <td
       className={cn(
-        'px-4 py-3.5 text-[13px] text-ink-700',
+        'px-3 py-3 text-[13px] text-ink-700 sm:px-4 sm:py-3.5',
         align === 'right' && 'text-right',
         align === 'center' && 'text-center',
         className,

@@ -116,16 +116,16 @@ export default function Statements() {
 
       <div className="grid gap-4 lg:grid-cols-3">
         <SectionCard title="Opening balance" bodyClassName="p-4">
-          <p className="text-[11px] uppercase tracking-[0.08em] text-ink-400">Start</p>
-          <p className="mt-2 text-[20px] font-semibold text-ink-900">{formatCurrency(statement?.totals?.openingBalance ?? 0)}</p>
+          <p className="text-[11.5px] uppercase tracking-[0.08em] text-ink-500">Start</p>
+          <p className="amount mt-2 text-[clamp(1.125rem,5.2vw,1.25rem)] font-semibold text-ink-900">{formatCurrency(statement?.totals?.openingBalance ?? 0)}</p>
         </SectionCard>
         <SectionCard title="Closing balance" bodyClassName="p-4">
-          <p className="text-[11px] uppercase tracking-[0.08em] text-ink-400">End</p>
-          <p className="mt-2 text-[20px] font-semibold text-ink-900">{formatCurrency(statement?.totals?.closingBalance ?? 0)}</p>
+          <p className="text-[11.5px] uppercase tracking-[0.08em] text-ink-500">End</p>
+          <p className="amount mt-2 text-[clamp(1.125rem,5.2vw,1.25rem)] font-semibold text-ink-900">{formatCurrency(statement?.totals?.closingBalance ?? 0)}</p>
         </SectionCard>
         <SectionCard title="Activity" bodyClassName="p-4">
-          <p className="text-[11px] uppercase tracking-[0.08em] text-ink-400">Transactions</p>
-          <p className="mt-2 text-[20px] font-semibold text-ink-900">{statement?.transactions.length ?? 0}</p>
+          <p className="text-[11.5px] uppercase tracking-[0.08em] text-ink-500">Transactions</p>
+          <p className="amount mt-2 text-[clamp(1.125rem,5.2vw,1.25rem)] font-semibold text-ink-900">{statement?.transactions.length ?? 0}</p>
         </SectionCard>
       </div>
 
@@ -159,14 +159,14 @@ export default function Statements() {
                         {' · '}
                         <span className="capitalize">{transaction.type}</span>
                       </p>
-                      <p className="amount mt-0.5 text-[11.5px] text-ink-400">
+                      <p className="amount mt-0.5 text-[11.5px] text-ink-500">
                         Balance {formatCurrency(transaction.balanceAfter ?? 0)}
                       </p>
                     </div>
                     <span
                       className={cn(
                         'amount shrink-0 text-[13px] font-semibold',
-                        transaction.type === 'credit' ? 'text-success-600' : 'text-ink-900',
+                        transaction.type === 'credit' ? 'text-success-700' : 'text-ink-900',
                       )}
                     >
                       {transaction.type === 'credit' ? '+' : '−'}
@@ -178,7 +178,7 @@ export default function Statements() {
 
               {/* Tablet and up: the full statement table. */}
               <div className="hidden md:block">
-                <div className="overflow-x-auto">
+                <div className="scroll-x">
                   <table className="min-w-full text-left text-[12.5px]">
                     <thead>
                       <tr className="border-b border-ink-100 text-ink-500">

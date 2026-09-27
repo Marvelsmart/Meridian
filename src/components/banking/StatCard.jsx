@@ -33,15 +33,15 @@ export function StatCard({
       onClick={onClick}
       type={onClick ? 'button' : undefined}
       className={cn(
-        'flex flex-col rounded-card border border-ink-200 bg-white p-4 text-left shadow-card transition',
+        'flex min-w-0 flex-col rounded-card border border-ink-200 bg-white p-3.5 text-left shadow-card transition sm:p-4',
         onClick && 'hover:border-ink-300 hover:shadow-pop',
         className,
       )}
     >
-      <div className="flex items-center justify-between gap-3">
-        <p className="text-[12.5px] font-medium text-ink-500">{label}</p>
+      <div className="flex min-w-0 items-center justify-between gap-2 sm:gap-3">
+        <p className="min-w-0 truncate text-[12px] font-medium text-ink-500 sm:text-[12.5px]">{label}</p>
         {Icon ? (
-          <span className={cn('flex size-7 items-center justify-center rounded-lg', tones[tone] ?? tones.ink)}>
+          <span className={cn('flex size-6 shrink-0 items-center justify-center rounded-lg sm:size-7', tones[tone] ?? tones.ink)}>
             <Icon className="size-3.5" aria-hidden="true" />
           </span>
         ) : null}
@@ -50,11 +50,18 @@ export function StatCard({
       {loading ? (
         <Skeleton className="mt-3 h-6 w-24" />
       ) : (
-        <p className="amount mt-2.5 text-[19px] font-semibold text-ink-900">{value}</p>
+        /**
+         * Fluid figure: the amount stays on one line inside a two-up tile on a
+         * 320px phone without ever spilling out of the card, and lands back on
+         * the original 19px from ~420px upwards.
+         */
+        <p className="amount mt-2.5 min-w-0 text-[clamp(0.95rem,4.5vw,1.1875rem)] font-semibold leading-tight text-ink-900">
+          {value}
+        </p>
       )}
 
       {delta !== null || hint ? (
-        <div className="mt-1.5 flex items-center gap-1.5 text-[12px]">
+        <div className="mt-1.5 flex min-w-0 items-center gap-1.5 text-[12px]">
           {delta !== null && !loading ? (
             <span
               className={cn(
@@ -65,7 +72,11 @@ export function StatCard({
               {formatPercent(delta)}
             </span>
           ) : null}
-          {hint ? <span className="text-ink-500">{hint}</span> : deltaLabel ? <span className="text-ink-500">{deltaLabel}</span> : null}
+          {hint ? (
+            <span className="min-w-0 truncate text-ink-500">{hint}</span>
+          ) : deltaLabel ? (
+            <span className="min-w-0 truncate text-ink-500">{deltaLabel}</span>
+          ) : null}
         </div>
       ) : null}
     </Wrapper>

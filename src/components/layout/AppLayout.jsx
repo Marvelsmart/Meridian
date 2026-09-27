@@ -61,7 +61,7 @@ export function AppLayout() {
         <Header />
         <MobileHeader title={title} />
 
-        <main className="mx-auto min-w-0 w-full max-w-[1180px] overflow-x-clip px-4 pb-28 pt-5 sm:px-6 lg:px-8 lg:pb-14 lg:pt-7">
+        <main className="mx-auto w-full min-w-0 max-w-[1180px] overflow-x-clip px-4 pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))] pt-5 sm:px-6 lg:px-8 lg:pb-14 lg:pt-7">
           <Outlet />
         </main>
       </div>

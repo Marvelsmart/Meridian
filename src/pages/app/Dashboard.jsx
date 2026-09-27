@@ -113,7 +113,7 @@ export default function Dashboard() {
         </div>
 
         <div className="space-y-4 lg:col-span-5">
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-2.5 sm:gap-3">
             <StatCard
               label="Money in · 30d"
               value={formatCurrency(summary?.summary?.credits ?? 0)}

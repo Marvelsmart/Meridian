@@ -25,7 +25,7 @@ export function TransactionItem({ transaction, variant = 'default', showBalance 
     <Link
       to={`/app/transactions/${transaction.id}`}
       className={cn(
-        'group flex items-center gap-3 rounded-xl px-2 py-3 transition-colors hover:bg-ink-50',
+        'group flex min-w-0 items-center gap-2.5 rounded-xl px-2 py-3 transition-colors hover:bg-ink-50 sm:gap-3',
         variant === 'compact' && 'py-2.5',
         className,
       )}
@@ -53,7 +53,12 @@ export function TransactionItem({ transaction, variant = 'default', showBalance 
       </div>
 
       <div className="flex shrink-0 flex-col items-end gap-1">
-        <p className={cn('amount text-[13.5px] font-semibold', isCredit ? 'text-success-600' : 'text-ink-900')}>
+        <p
+          className={cn(
+            'amount whitespace-nowrap text-[13.5px] font-semibold',
+            isCredit ? 'text-success-600' : 'text-ink-900',
+          )}
+        >
           {isCredit ? '+' : '−'}
           {formatCurrency(transaction.amount, { showSymbol: true })}
         </p>

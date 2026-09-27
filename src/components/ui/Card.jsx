@@ -5,7 +5,9 @@ export function Card({ as: Tag = 'div', className = '', padded = true, children,
     <Tag
       className={cn(
         'rounded-card border border-ink-200 bg-white shadow-card',
-        padded && 'p-5',
+        // Tighter gutters on phones (more usable width per card), the original
+        // 20px rhythm from `sm` upwards.
+        padded && 'p-4 sm:p-5',
         className,
       )}
       {...props}
@@ -29,16 +31,16 @@ export function SectionCard({
   return (
     <section className={cn('overflow-hidden rounded-card border border-ink-200 bg-white shadow-card', className)}>
       {title || action ? (
-        <header className="flex flex-wrap items-start justify-between gap-3 border-b border-ink-100 px-5 py-4">
+        <header className="flex flex-wrap items-start justify-between gap-3 border-b border-ink-100 px-4 py-4 sm:px-5">
           <div className="min-w-0">
             <h2 className="text-[15px] font-semibold text-ink-900">{title}</h2>
-            {description ? <p className="mt-0.5 text-[13px] text-ink-500">{description}</p> : null}
+            {description ? <p className="mt-0.5 text-[13px] leading-5 text-ink-500">{description}</p> : null}
           </div>
-          {action ? <div className="shrink-0">{action}</div> : null}
+          {action ? <div className="max-w-full shrink-0">{action}</div> : null}
         </header>
       ) : null}
-      <div className={cn(padded && 'p-5', bodyClassName)}>{children}</div>
-      {footer ? <footer className="border-t border-ink-100 bg-ink-50/60 px-5 py-3">{footer}</footer> : null}
+      <div className={cn(padded && 'p-4 sm:p-5', bodyClassName)}>{children}</div>
+      {footer ? <footer className="border-t border-ink-100 bg-ink-50/60 px-4 py-3 sm:px-5">{footer}</footer> : null}
     </section>
   )
 }

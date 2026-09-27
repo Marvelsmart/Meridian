@@ -44,13 +44,16 @@ export function Modal({
         aria-modal="true"
         aria-label={typeof title === 'string' ? title : undefined}
         className={cn(
-          'relative flex max-h-[92vh] w-full flex-col overflow-hidden rounded-t-2xl bg-white shadow-pop animate-rise sm:rounded-card',
+          // Bottom sheet on phones (rounded top, full width), centered dialog on
+          // larger screens. `dvh` keeps the sheet inside the visible viewport
+          // while the mobile browser chrome slides in and out.
+          'relative flex max-h-[92vh] w-full flex-col overflow-hidden rounded-t-2xl bg-white shadow-pop animate-rise supports-[max-height:100dvh]:max-h-[92dvh] sm:rounded-card',
           SIZES[size] ?? SIZES.md,
           className,
         )}
       >
         {title ? (
-          <header className="flex items-start justify-between gap-4 border-b border-ink-100 px-5 py-4">
+          <header className="flex items-start justify-between gap-4 border-b border-ink-100 px-4 py-4 sm:px-5">
             <div className="min-w-0">
               <h2 className="text-base font-semibold text-ink-900">{title}</h2>
               {description ? <p className="mt-0.5 text-[13px] leading-5 text-ink-500">{description}</p> : null}
@@ -59,10 +62,10 @@ export function Modal({
           </header>
         ) : null}
 
-        <div className={cn('min-h-0 flex-1 overflow-y-auto px-5 py-5', bodyClassName)}>{children}</div>
+        <div className={cn('min-h-0 flex-1 overflow-y-auto px-4 py-5 sm:px-5', bodyClassName)}>{children}</div>
 
         {footer ? (
-          <footer className="flex flex-col-reverse gap-2 border-t border-ink-100 bg-ink-50/60 px-5 py-4 sm:flex-row sm:justify-end">
+          <footer className="flex flex-col-reverse gap-2 border-t border-ink-100 bg-ink-50/60 px-4 py-4 pb-[max(1rem,env(safe-area-inset-bottom,0px))] sm:flex-row sm:justify-end sm:px-5 sm:pb-4">
             {footer}
           </footer>
         ) : null}
@@ -75,7 +78,7 @@ export function Modal({
 const DRAWER_SIDES = {
   right: 'right-0 top-0 h-full w-full max-w-md animate-slide-in-right border-l',
   left: 'left-0 top-0 h-full w-full max-w-sm border-r',
-  bottom: 'bottom-0 left-0 w-full max-h-[88vh] rounded-t-2xl border-t animate-rise',
+  bottom: 'bottom-0 left-0 w-full max-h-[88vh] supports-[max-height:100dvh]:max-h-[88dvh] rounded-t-2xl border-t animate-rise',
 }
 
 export function Drawer({ open, onClose, side = 'right', title, description, children, footer = null, className = '' }) {
@@ -98,17 +101,17 @@ export function Drawer({ open, onClose, side = 'right', title, description, chil
         )}
       >
         {title ? (
-          <header className="flex items-center justify-between gap-4 border-b border-ink-100 px-5 py-4">
+          <header className="flex items-center justify-between gap-4 border-b border-ink-100 px-4 py-4 sm:px-5">
             <div className="min-w-0">
               <h2 className="text-base font-semibold text-ink-900">{title}</h2>
-              {description ? <p className="mt-0.5 text-[13px] text-ink-500">{description}</p> : null}
+              {description ? <p className="mt-0.5 text-[13px] leading-5 text-ink-500">{description}</p> : null}
             </div>
             <IconButton label="Close" icon={X} size="sm" onClick={onClose} />
           </header>
         ) : null}
-        <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5">{children}</div>
+        <div className="min-h-0 flex-1 overflow-y-auto px-4 py-5 sm:px-5">{children}</div>
         {footer ? (
-          <footer className="border-t border-ink-100 bg-ink-50/60 px-5 py-4 safe-bottom">{footer}</footer>
+          <footer className="safe-bottom-inset border-t border-ink-100 bg-ink-50/60 px-4 py-4 sm:px-5">{footer}</footer>
         ) : null}
       </div>
     </div>,

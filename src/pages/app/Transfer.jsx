@@ -193,7 +193,7 @@ export default function Transfer() {
             <AccountSelect accounts={accounts} value={flow.accountId} onChange={flow.setAccountId} label="Send from" />
           </Card>
 
-          <div className="flex items-center justify-between gap-2">
+          <div className="flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-between">
             <Button variant="ghost" onClick={() => navigate('/app/dashboard')}>
               Cancel
             </Button>
@@ -230,7 +230,7 @@ export default function Transfer() {
             ]}
           />
 
-          <div className="flex items-center justify-between gap-2">
+          <div className="flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-between">
             <Button variant="secondary" onClick={flow.goBack}>
               Back
             </Button>
@@ -289,7 +289,7 @@ export default function Transfer() {
             </div>
           ) : null}
 
-          <div className="flex items-center justify-between gap-2">
+          <div className="flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-between">
             <Button variant="secondary" onClick={flow.goBack}>
               Back
             </Button>
@@ -336,7 +336,7 @@ export default function Transfer() {
               support to request a reversal.
             </p>
 
-            <div className="flex items-center justify-between gap-2">
+            <div className="flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-between">
               <Button variant="secondary" onClick={flow.goBack}>
                 Back
               </Button>
@@ -368,7 +368,7 @@ export default function Transfer() {
             autoFocus
           />
 
-          <div className="flex items-center justify-between gap-2">
+          <div className="flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-between">
             <Button variant="secondary" onClick={flow.goBack} disabled={flow.pin.length > 0}>
               Back
             </Button>
