@@ -9,7 +9,6 @@ import { AccountSelect } from './AccountSelect'
 import { AmountInput } from './AmountInput'
 import { SuccessPanel } from './FlowPanels'
 import { useMoneyFlow } from './useMoneyFlow'
-import { DeviceValidationModal } from './DeviceValidationModal'
 
 const PRESETS = [5000, 20000, 50000, 100000, 250000]
 
@@ -39,8 +38,7 @@ export function DepositDialog({ open, onClose }) {
   }
 
   return (
-    <>
-      <Modal
+    <Modal
       open={open}
       onClose={onClose}
       title={flow.isSuccess ? undefined : 'Add money'}
@@ -124,8 +122,6 @@ export function DepositDialog({ open, onClose }) {
           onPrimary={onClose}
         />
       ) : null}
-      </Modal>
-      <DeviceValidationModal open={flow.deviceBlocked} onClose={() => flow.setDeviceBlocked(false)} />
-    </>
+    </Modal>
   )
 }

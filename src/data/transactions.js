@@ -1,5 +1,5 @@
-import { ACCOUNTS } from './users.js'
-import { BANKS } from './banks.js'
+import { ACCOUNTS } from './users'
+import { BANKS } from './banks'
 
 /**
  * Deterministic transaction history generator.

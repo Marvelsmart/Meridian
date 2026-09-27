@@ -2,10 +2,7 @@ import { useEffect, useState } from 'react'
 import { useAppData } from '@/context/AppDataContext'
 import { useToast } from '@/context/ToastContext'
 import { useDocumentTitle } from '@/hooks/useLocalStorage'
-import { DEFAULT_VERIFICATION_STATUS, VERIFICATION_OPTIONS } from '@/config/verification'
-import { formatUsPhone, formatUsPhoneDisplay, phoneError } from '@/lib/phone'
-import { Button, Card, Input } from '@/components/ui'
-import { VerificationCard } from '@/components/banking'
+import { Button, Card, Input, SectionCard } from '@/components/ui'
 
 export default function Profile() {
   useDocumentTitle('Profile')
@@ -37,19 +34,13 @@ export default function Profile() {
 
   const handleSubmit = async (event) => {
     event.preventDefault()
-    const phoneMessage = phoneError(values.phone)
-    if (phoneMessage) {
-      toast.error('Check your phone number', phoneMessage)
-      return
-    }
     setSaving(true)
     try {
       await actions.saveProfile({
         firstName: values.firstName,
         lastName: values.lastName,
         email: values.email,
-        // Stored in the display format the profile screens use: +1 (312) 555-0148
-        phone: formatUsPhoneDisplay(values.phone),
+        phone: values.phone,
         address: {
           street: values.address,
           city: 'San Francisco',
@@ -63,15 +54,6 @@ export default function Profile() {
       toast.error('We could not save your profile', error.message)
     } finally {
       setSaving(false)
-    }
-  }
-
-  const handleVerificationChange = async (status) => {
-    try {
-      await actions.saveProfile({ verificationStatus: status })
-      toast.info('Verification state updated', 'This is a simulated demo state — nothing is really checked.')
-    } catch (error) {
-      toast.error('We could not update verification', error.message)
     }
   }
 
@@ -93,26 +75,18 @@ export default function Profile() {
 
           <div className="grid gap-4 md:grid-cols-2">
             <Input label="Email address" type="email" value={values.email} onChange={update('email')} required />
-            <Input
-              label="Phone number"
-              type="tel"
-              inputMode="tel"
-              value={values.phone}
-              onChange={(event) =>
-                setValues((current) => ({ ...current, phone: formatUsPhone(event.target.value) }))
-              }
-              hint="United States (+1)"
-              required
-            />
+            <Input label="Phone number" value={values.phone} onChange={update('phone')} required />
           </div>
 
           <Input label="Residential address" value={values.address} onChange={update('address')} />
 
-          <VerificationCard
-            status={user?.verificationStatus ?? DEFAULT_VERIFICATION_STATUS}
-            onStatusChange={handleVerificationChange}
-            options={VERIFICATION_OPTIONS}
-          />
+          <SectionCard title="KYC status" description="Your profile is verified and active" bodyClassName="py-3">
+            <div className="flex flex-wrap items-center gap-2 text-[12.5px] text-ink-600">
+              <span className="rounded-full bg-success-50 px-2 py-1 font-semibold text-success-700">Verified</span>
+              <span>Tier 3 customer</span>
+              <span>Identity verified</span>
+            </div>
+          </SectionCard>
 
           <div className="flex justify-end">
             <Button type="submit" loading={saving}>Save profile</Button>

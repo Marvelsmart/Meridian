@@ -1,17 +1,15 @@
 import { useEffect } from 'react'
-import { HashRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom'
+import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { AuthProvider } from '@/context/AuthContext'
 import { AppDataProvider } from '@/context/AppDataContext'
 import { ToastProvider } from '@/context/ToastContext'
-import { ErrorBoundary } from '@/components/layout/ErrorBoundary'
 import { AppLayout } from '@/components/layout/AppLayout'
-import { ManagerCodeGuard, ProtectedRoute, PublicOnlyRoute } from '@/components/layout/ProtectedRoute'
+import { ProtectedRoute, PublicOnlyRoute } from '@/components/layout/ProtectedRoute'
 import { PublicLayout } from '@/components/layout/PublicLayout'
 
 import Landing from '@/pages/public/Landing'
 import Login from '@/pages/public/Login'
 import Register from '@/pages/public/Register'
-import RegisterGate from '@/pages/public/RegisterGate'
 import ForgotPassword from '@/pages/public/ForgotPassword'
 import ResetPassword from '@/pages/public/ResetPassword'
 import NotFound from '@/pages/NotFound'
@@ -27,7 +25,6 @@ import Notifications from '@/pages/app/Notifications'
 import Profile from '@/pages/app/Profile'
 import Security from '@/pages/app/Security'
 import Statements from '@/pages/app/Statements'
-import Support from '@/pages/app/Support'
 
 function ScrollToTop() {
   const { pathname } = useLocation()
@@ -39,95 +36,80 @@ function ScrollToTop() {
 
 export default function App() {
   return (
-    <HashRouter>
+    <BrowserRouter>
       <ToastProvider>
         <AuthProvider>
           <ScrollToTop />
-          <ErrorBoundary>
-            <Routes>
-              {/* Public marketing */}
-              <Route element={<PublicLayout />}>
-                <Route path="/" element={<Landing />} />
-              </Route>
+          <Routes>
+            {/* Public marketing */}
+            <Route element={<PublicLayout />}>
+              <Route path="/" element={<Landing />} />
+            </Route>
 
-              {/* Auth — each page renders its own AuthLayout copy so titles stay local */}
-              <Route
-                path="/login"
-                element={
-                  <PublicOnlyRoute>
-                    <Login />
-                  </PublicOnlyRoute>
-                }
-              />
+            {/* Auth — each page renders its own AuthLayout copy so titles stay local */}
+            <Route
+              path="/login"
+              element={
+                <PublicOnlyRoute>
+                  <Login />
+                </PublicOnlyRoute>
+              }
+            />
+            <Route
+              path="/register"
+              element={
+                <PublicOnlyRoute>
+                  <Register />
+                </PublicOnlyRoute>
+              }
+            />
+            <Route
+              path="/forgot-password"
+              element={
+                <PublicOnlyRoute>
+                  <ForgotPassword />
+                </PublicOnlyRoute>
+              }
+            />
+            <Route
+              path="/reset-password"
+              element={
+                <PublicOnlyRoute>
+                  <ResetPassword />
+                </PublicOnlyRoute>
+              }
+            />
 
-              {/* Signup flow: manager code gate → actual signup form */}
-              <Route
-                path="/register"
-                element={
-                  <PublicOnlyRoute>
-                    <RegisterGate />
-                  </PublicOnlyRoute>
-                }
-              />
-              <Route
-                path="/register/account"
-                element={
-                  <PublicOnlyRoute>
-                    <ManagerCodeGuard>
-                      <Register />
-                    </ManagerCodeGuard>
-                  </PublicOnlyRoute>
-                }
-              />
-              <Route
-                path="/forgot-password"
-                element={
-                  <PublicOnlyRoute>
-                    <ForgotPassword />
-                  </PublicOnlyRoute>
-                }
-              />
-              <Route
-                path="/reset-password"
-                element={
-                  <PublicOnlyRoute>
-                    <ResetPassword />
-                  </PublicOnlyRoute>
-                }
-              />
+            {/* Authenticated product */}
+            <Route
+              path="/app"
+              element={
+                <ProtectedRoute>
+                  <AppDataProvider>
+                    <AppLayout />
+                  </AppDataProvider>
+                </ProtectedRoute>
+              }
+            >
+              <Route index element={<Navigate to="/app/dashboard" replace />} />
+              <Route path="dashboard" element={<Dashboard />} />
+              <Route path="transactions" element={<Transactions />} />
+              <Route path="transactions/:transactionId" element={<TransactionDetails />} />
+              <Route path="transfer" element={<Transfer />} />
+              <Route path="beneficiaries" element={<Beneficiaries />} />
+              <Route path="cards" element={<Cards />} />
+              <Route path="bills" element={<BillPayments />} />
+              <Route path="notifications" element={<Notifications />} />
+              <Route path="profile" element={<Profile />} />
+              <Route path="security" element={<Security />} />
+              <Route path="statements" element={<Statements />} />
+            </Route>
 
-              {/* Authenticated product */}
-              <Route
-                path="/app"
-                element={
-                  <ProtectedRoute>
-                    <AppDataProvider>
-                      <AppLayout />
-                    </AppDataProvider>
-                  </ProtectedRoute>
-                }
-              >
-                <Route index element={<Navigate to="/app/dashboard" replace />} />
-                <Route path="dashboard" element={<Dashboard />} />
-                <Route path="transactions" element={<Transactions />} />
-                <Route path="transactions/:transactionId" element={<TransactionDetails />} />
-                <Route path="transfer" element={<Transfer />} />
-                <Route path="beneficiaries" element={<Beneficiaries />} />
-                <Route path="cards" element={<Cards />} />
-                <Route path="bills" element={<BillPayments />} />
-                <Route path="notifications" element={<Notifications />} />
-                <Route path="profile" element={<Profile />} />
-                <Route path="security" element={<Security />} />
-                <Route path="statements" element={<Statements />} />
-                <Route path="support" element={<Support />} />
-              </Route>
-
-              <Route path="/dashboard" element={<Navigate to="/app/dashboard" replace />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </ErrorBoundary>
+            <Route path="/dashboard" element={<Navigate to="/app/dashboard" replace />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
         </AuthProvider>
       </ToastProvider>
-    </HashRouter>
+    </BrowserRouter>
   )
 }

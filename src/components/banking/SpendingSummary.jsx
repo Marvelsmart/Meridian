@@ -32,9 +32,9 @@ export function SpendingSummary({ data = [], total = 0, loading = false, classNa
     : slices
 
   return (
-    <div className={cn('flex flex-col gap-5 sm:flex-row sm:items-center', className)}>
+    <div className={cn('flex flex-col gap-5 sm:flex-row sm:items-center min-w-0 w-full', className)}>
       <div className="relative mx-auto size-40 shrink-0">
-        <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveContainer width="100%" height="100%" minWidth={0}>
           <PieChart>
             <Pie
               data={chartData}

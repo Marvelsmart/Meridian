@@ -3,7 +3,6 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { CheckCircle2, ShieldCheck } from 'lucide-react'
 import { useToast } from '@/context/ToastContext'
 import * as api from '@/lib/api'
-import { BRAND } from '@/lib/constants'
 import { useDocumentTitle } from '@/hooks/useLocalStorage'
 import { Alert, Button, Input } from '@/components/ui'
 import { AuthLayout } from '@/components/layout/AuthLayout'
@@ -15,7 +14,6 @@ export default function ResetPassword() {
   const [params] = useSearchParams()
   const [values, setValues] = useState({
     code: params.get('code') ?? '',
-    email: params.get('email') ?? '',
     password: '',
     confirmPassword: '',
   })
@@ -58,7 +56,7 @@ export default function ResetPassword() {
             Sign in
           </Button>
           <p className="text-[12.5px] text-ink-500">
-            Need help instead? Contact support on {BRAND.supportEmail}.{' '}
+            Need help instead? Contact support on {api.demoCredentials.email}.{' '}
             <Link to="/forgot-password" className="font-medium text-brand-700 hover:underline">
               Request another code
             </Link>

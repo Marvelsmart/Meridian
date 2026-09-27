@@ -22,13 +22,13 @@ export function AuthLayout({ title, subtitle, children, footer = null, points = 
         </div>
 
         <div className="mx-auto flex w-full max-w-[420px] flex-1 flex-col justify-center py-10">
-          <h1 className="text-[clamp(1.375rem,5.6vw,1.625rem)] font-semibold leading-tight tracking-[-0.02em] text-ink-900">{title}</h1>
+          <h1 className="text-[26px] font-semibold leading-tight tracking-[-0.02em] text-ink-900">{title}</h1>
           {subtitle ? <p className="mt-2 text-[13.5px] leading-6 text-ink-500">{subtitle}</p> : null}
           <div className="mt-7">{children}</div>
           {footer ? <div className="mt-6 text-[13px] text-ink-500">{footer}</div> : null}
         </div>
 
-        <p className="text-[12px] text-ink-500">
+        <p className="text-[12px] text-ink-400">
           Demo environment · mock data only · not a real financial institution
         </p>
       </div>

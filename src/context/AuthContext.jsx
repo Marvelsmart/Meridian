@@ -10,10 +10,6 @@ const SESSION_EXPIRED_EVENT = 'northstar:session-expired'
 export function AuthProvider({ children }) {
   const [session, setSession] = useState(() => {
     const stored = api.currentSession()
-    if (stored?.token?.startsWith('mdn_')) {
-      api.persistSession(null)
-      return null
-    }
     return stored
   })
   const [status, setStatus] = useState('idle')
