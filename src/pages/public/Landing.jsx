@@ -67,7 +67,7 @@ export default function Landing() {
               Member FDIC · secure digital banking
             </span>
 
-            <h1 className="mt-6 text-[34px] font-semibold leading-[1.08] tracking-[-0.03em] text-ink-900 sm:text-[46px]">
+            <h1 className="mt-6 text-[clamp(1.75rem,7.4vw,2.875rem)] font-semibold leading-[1.08] tracking-[-0.03em] text-ink-900">
               Banking that moves with your life.
             </h1>
 
@@ -81,18 +81,18 @@ export default function Landing() {
                 Open an account
               </Button>
               <Button size="lg" variant="secondary" to="/login">
-                Sign in to demo
+                Sign in
               </Button>
             </div>
 
-            <dl className="mt-10 grid max-w-lg grid-cols-3 gap-6 border-t border-ink-200 pt-6">
+            <dl className="mt-10 grid max-w-lg grid-cols-3 gap-4 border-t border-ink-200 pt-6 sm:gap-6">
               {[
                 { label: 'Customers', value: '2.4M+' },
                 { label: 'Transfers monthly', value: '$84M' },
                 { label: 'Uptime', value: '99.98%' },
               ].map((stat) => (
                 <div key={stat.label}>
-                  <dt className="text-[12px] font-medium uppercase tracking-[0.07em] text-ink-400">{stat.label}</dt>
+                  <dt className="text-[12px] font-medium uppercase tracking-[0.07em] text-ink-500">{stat.label}</dt>
                   <dd className="amount mt-1 text-[19px] font-semibold text-ink-900">{stat.value}</dd>
                 </div>
               ))}
@@ -118,7 +118,7 @@ export default function Landing() {
                 ))}
               </SectionCard>
             </div>
-            <p className="mt-3 text-center text-[11.5px] text-ink-400">
+            <p className="mt-3 text-center text-[11.5px] text-ink-500">
               Interface preview using mock data — no real money is involved.
             </p>
           </div>
@@ -201,7 +201,7 @@ export default function Landing() {
                   <div className="min-w-0">
                     <h3 className="text-[14.5px] font-semibold text-ink-900">{account.name}</h3>
                     <p className="mt-0.5 text-[13px] text-ink-600">{account.detail}</p>
-                    <p className="mt-1 text-[12.5px] text-ink-400">{account.note}</p>
+                    <p className="mt-1 text-[12.5px] text-ink-500">{account.note}</p>
                   </div>
                 </li>
               )
@@ -277,10 +277,10 @@ export default function Landing() {
           <div className="mt-14 flex flex-col items-start justify-between gap-6 rounded-card border border-ink-200 bg-ink-50 p-6 sm:flex-row sm:items-center sm:p-8">
             <div>
               <h2 className="text-[20px] font-semibold tracking-[-0.02em] text-ink-900">
-                Try the full product with demo data.
+                Try the full product.
               </h2>
               <p className="mt-1.5 text-[13.5px] text-ink-600">
-                Sign in with {BRAND.name} demo credentials and explore every screen — nothing you do affects real money.
+                Explore the banking experience in a fictional environment — nothing you do affects real money.
               </p>
             </div>
             <div className="flex shrink-0 gap-3">

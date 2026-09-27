@@ -36,7 +36,7 @@ export function AppDataProvider({ children }) {
     setError(null)
     try {
       const data = await api.getAppData()
-      setState(data)
+      setState({ ...data, accounts: data.accounts.filter((account) => account.primary) })
       setStatus('ready')
       return data
     } catch (err) {

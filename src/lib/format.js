@@ -74,6 +74,20 @@ export function formatTime(value) {
   return date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
 }
 
+/** September 24, 2026 — U.S. long date used on receipts and detail screens. */
+export function formatLongDate(value) {
+  const date = toDate(value)
+  if (Number.isNaN(date.getTime())) return '—'
+  return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+}
+
+/** 10:42 AM */
+export function formatClockTime(value) {
+  const date = toDate(value)
+  if (Number.isNaN(date.getTime())) return '—'
+  return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
+}
+
 /** "Just now" · "4h ago" · "3d ago" · date */
 export function formatRelativeTime(value) {
   const date = toDate(value)

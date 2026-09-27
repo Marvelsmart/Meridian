@@ -9,7 +9,7 @@ export function NetworkSelector({ value, onChange, error = null, className = '' 
   return (
     <div className={cn('flex flex-col gap-2', className)}>
       <span className="text-[13px] font-medium text-ink-700">Network</span>
-      <div className="grid grid-cols-4 gap-2" role="radiogroup" aria-label="Network">
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4" role="radiogroup" aria-label="Network">
         {NETWORKS.map((network) => {
           const active = value === network.id
           return (
@@ -20,17 +20,17 @@ export function NetworkSelector({ value, onChange, error = null, className = '' 
               aria-checked={active}
               onClick={() => onChange?.(network.id)}
               className={cn(
-                'flex flex-col items-center gap-2 rounded-card border px-2 py-3 transition',
+                'flex min-w-0 flex-col items-center gap-2 rounded-card border px-2 py-3 transition',
                 active ? 'border-brand-600 bg-brand-50/60' : 'border-ink-200 hover:border-ink-300 hover:bg-ink-50',
               )}
             >
               <span
-                className="flex size-8 items-center justify-center rounded-full text-[11px] font-bold"
+                className="flex size-8 shrink-0 items-center justify-center rounded-full text-[11px] font-bold"
                 style={{ background: network.color, color: network.textOnColor }}
               >
                 {network.name.slice(0, 2)}
               </span>
-              <span className="text-[12px] font-medium text-ink-800">{network.name}</span>
+              <span className="max-w-full truncate text-[12px] font-medium text-ink-800">{network.name}</span>
             </button>
           )
         })}

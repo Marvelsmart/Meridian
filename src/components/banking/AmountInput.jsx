@@ -28,7 +28,7 @@ export function AmountInput({
 
   return (
     <div className={cn('flex flex-col gap-2', className)}>
-      <div className="flex items-baseline justify-between gap-3">
+      <div className="flex min-w-0 flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
         <label htmlFor={id} className="text-[13px] font-medium text-ink-700">
           {label}
         </label>
@@ -36,7 +36,7 @@ export function AmountInput({
           <button
             type="button"
             onClick={() => onChange?.(String(available))}
-            className="text-[12.5px] font-medium text-brand-700 hover:underline"
+            className="min-w-0 truncate text-[12.5px] font-medium text-brand-700 hover:underline"
           >
             Available {formatCurrency(available)}
           </button>
@@ -45,7 +45,7 @@ export function AmountInput({
 
       <div
         className={cn(
-          'flex items-center gap-2 rounded-card border bg-white px-4 py-3 transition-colors focus-within:border-brand-500',
+          'flex items-center gap-2 rounded-card border bg-white px-3.5 py-3 transition-colors focus-within:border-brand-500 sm:px-4',
           error ? 'border-danger-500' : 'border-ink-200 hover:border-ink-300',
         )}
       >
@@ -60,7 +60,7 @@ export function AmountInput({
           onChange={(event) => handleChange(event.target.value)}
           placeholder="0.00"
           aria-invalid={Boolean(error)}
-          className="amount w-full border-0 bg-transparent text-2xl font-semibold text-ink-900 outline-none placeholder:text-ink-300 disabled:cursor-not-allowed"
+          className="amount input-lg w-full min-w-0 border-0 bg-transparent text-[clamp(1.25rem,6vw,1.5rem)] font-semibold text-ink-900 outline-none placeholder:text-ink-300 disabled:cursor-not-allowed"
         />
       </div>
 

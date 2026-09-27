@@ -95,22 +95,11 @@ love yah
     overflow-x: clip;
   }
 
-  /* Media and chart containers can never push a card wider than its container. */
+  /* Media can never push a card wider than its container. */
   img,
   video,
   canvas {
     max-width: 100%;
-  }
-
-  /* Recharts responsive containers: prevent SVG calculation loops and horizontal overflow in flex/grid parents */
-  .recharts-responsive-container {
-    max-width: 100% !important;
-    min-width: 0 !important;
-  }
-
-  .recharts-wrapper,
-  .recharts-surface {
-    max-width: 100% !important;
   }
 
   /* Interactive elements respond immediately instead of waiting 300ms for a

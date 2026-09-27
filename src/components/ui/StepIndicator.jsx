@@ -19,7 +19,7 @@ export function StepIndicator({ steps, current = 0, onStepClick = null, classNam
                   'flex size-7 shrink-0 items-center justify-center rounded-full border text-[11px] font-semibold transition-colors',
                   state === 'done' && 'border-brand-600 bg-brand-600 text-white',
                   state === 'current' && 'border-brand-600 bg-white text-brand-700',
-                  state === 'upcoming' && 'border-ink-200 bg-white text-ink-400',
+                  state === 'upcoming' ? 'border-ink-200 bg-white text-ink-500' : null,
                   clickable && 'cursor-pointer hover:border-brand-700',
                 )}
                 aria-current={state === 'current' ? 'step' : undefined}
@@ -29,7 +29,7 @@ export function StepIndicator({ steps, current = 0, onStepClick = null, classNam
               <span
                 className={cn(
                   'hidden truncate text-[12.5px] font-medium sm:block',
-                  state === 'upcoming' ? 'text-ink-400' : 'text-ink-700',
+                  state === 'upcoming' ? 'text-ink-500' : 'text-ink-700',
                 )}
               >
                 {step.label}

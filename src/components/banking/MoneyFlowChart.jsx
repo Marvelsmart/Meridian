@@ -5,8 +5,8 @@ import { cn } from '@/lib/cn'
 /** 14-day in / out flow. Two restrained series, no gradients-heavy styling. */
 export function MoneyFlowChart({ data = [], height = 220, className = '' }) {
   return (
-    <div className={cn('w-full min-w-0 max-w-full overflow-hidden', className)} style={{ height }}>
-      <ResponsiveContainer width="100%" height="100%" minWidth={0}>
+    <div className={cn('w-full', className)} style={{ height }}>
+      <ResponsiveContainer width="100%" height="100%">
         <AreaChart data={data} margin={{ top: 8, right: 8, left: -12, bottom: 0 }}>
           <defs>
             <linearGradient id="creditFill" x1="0" y1="0" x2="0" y2="1">
