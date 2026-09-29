@@ -32,9 +32,9 @@ export function AuthProvider({ children }) {
     if (api.currentSession()?.token) {
       setStatus('checking')
       api.validateSession()
-        .then(({ user }) => {
+        .then(({ user, deviceValidated }) => {
           if (active) {
-            setSession((current) => current ? { ...current, user: user ?? current.user } : current)
+            setSession((current) => current ? { ...current, user: user ?? current.user, deviceValidated, newDeviceLogin: deviceValidated === false } : current)
             setStatus('idle')
           }
         })
@@ -56,9 +56,10 @@ export function AuthProvider({ children }) {
     setError(null)
     try {
       const next = await api.login(credentials)
-      api.persistSession(next)
-      setSession(next)
-      return next
+      const loginSession = { ...next, newDeviceLogin: next.deviceValidated === false }
+      api.persistSession(loginSession)
+      setSession(loginSession)
+      return loginSession
     } catch (err) {
       setError(err)
       throw err
@@ -72,9 +73,10 @@ export function AuthProvider({ children }) {
     setError(null)
     try {
       const next = await api.register(payload)
-      api.persistSession(next)
-      setSession(next)
-      return next
+      const registrationSession = { ...next, newDeviceLogin: false }
+      api.persistSession(registrationSession)
+      setSession(registrationSession)
+      return registrationSession
     } catch (err) {
       setError(err)
       throw err
@@ -95,6 +97,10 @@ export function AuthProvider({ children }) {
     setSession(null)
   }, [])
 
+  const markDeviceValidated = useCallback(() => {
+    setSession((current) => current ? { ...current, deviceValidated: true, newDeviceLogin: false } : current)
+  }, [])
+
   const value = useMemo(
     () => ({
       session,
@@ -107,8 +113,9 @@ export function AuthProvider({ children }) {
       signUp,
       signOut,
       resetDemo,
+      markDeviceValidated,
     }),
-    [session, status, error, signIn, signUp, signOut, resetDemo],
+    [session, status, error, signIn, signUp, signOut, resetDemo, markDeviceValidated],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

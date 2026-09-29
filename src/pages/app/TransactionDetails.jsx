@@ -236,6 +236,12 @@ export default function TransactionDetails() {
               <DetailRow label="Name" value={counterpartyName ?? '—'} />
               {transaction.description ? <DetailRow label="Description" value={transaction.description} /> : null}
               {transaction.counterparty?.bank ? <DetailRow label="Bank" value={transaction.counterparty.bank} /> : null}
+              {transaction.recipientDetails?.accountType ? <DetailRow label="Account type" value={transaction.recipientDetails.accountType} /> : null}
+              {transaction.recipientDetails?.routingNumber ? <DetailRow label="Routing number" value={transaction.recipientDetails.routingNumber} mono /> : null}
+              {transaction.recipientDetails?.sortingCode ? <DetailRow label="Sorting code" value={transaction.recipientDetails.sortingCode} mono /> : null}
+              {transaction.recipientDetails?.accountNumber ? (
+                <DetailRow label="Account number" value={maskAccountNumber(transaction.recipientDetails.accountNumber)} mono />
+              ) : null}
               {transaction.counterparty?.accountNumber ? (
                 <DetailRow
                   label="Account number"

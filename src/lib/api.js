@@ -173,7 +173,9 @@ export async function markAllNotificationsRead() { return requestBackend('/notif
 export async function deleteNotification(id) { return requestBackend(`/notifications/${id}`, { method: 'DELETE' }) }
 export async function updateProfile(patch) { return requestBackend('/profile', { method: 'PATCH', body: JSON.stringify(patch) }) }
 export async function changePassword(payload) { return requestBackend('/auth/password', post(payload)) }
+export async function setTransactionPin(payload) { return requestBackend('/auth/transaction-pin', post(payload)) }
 export async function updateSecuritySettings(patch) { return requestBackend('/security', { method: 'PATCH', body: JSON.stringify(patch) }) }
 export async function revokeSession(id) { return requestBackend(`/devices/${id}`, { method: 'DELETE' }) }
 export async function revokeOtherSessions() { return requestBackend('/devices/others', { method: 'DELETE' }) }
+export async function validateCurrentDevice(pin) { return requestBackend(`/devices/${encodeURIComponent(getDeviceId())}/validate`, post({ pin })) }
 export async function exportStatement({ accountId, from, to }) { return fetchStatement({ accountId, from, to }) }

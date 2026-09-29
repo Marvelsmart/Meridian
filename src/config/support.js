@@ -11,6 +11,10 @@ import { BRAND } from '@/lib/constants'
  */
 export const WHATSAPP_SUPPORT_NUMBER = ''
 
+// Add the Zangi support number here when provided. In-app delivery needs the
+// corresponding Zangi Business/API integration; a number alone is not enough.
+export const ZANGI_SUPPORT_NUMBER = ''
+
 /** Message pre-filled when the customer taps "Chat with Support". */
 export const WHATSAPP_SUPPORT_MESSAGE =
   `Hello ${BRAND.name} support, I need help with my account.`

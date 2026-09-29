@@ -51,4 +51,15 @@ router.post('/password', requireAuth, async (req, res) => {
   user.passwordHash = await bcrypt.hash(req.body.newPassword, 12); await user.save(); res.json({ success: true })
 })
 
+router.post('/transaction-pin', requireAuth, async (req, res) => {
+  const password = String(req.body.password || '')
+  const pin = String(req.body.pin || '')
+  const user = await User.findById(req.user._id).select('+passwordHash')
+  if (!user || !(await bcrypt.compare(password, user.passwordHash))) return res.status(422).json({ code: 'invalid_password', error: 'Password is incorrect.' })
+  if (!/^\d{4}$/.test(pin)) return res.status(400).json({ code: 'validation_error', error: 'PIN must be exactly 4 digits.' })
+  user.transactionPinHash = await bcrypt.hash(pin, 12)
+  await user.save()
+  res.json({ success: true })
+})
+
 export { router as authRouter }

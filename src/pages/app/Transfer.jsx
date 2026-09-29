@@ -1,33 +1,31 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { AlertCircle, Check, Search, Star, UserPlus, Users } from 'lucide-react'
-import { BANKS } from '@/data/banks'
+import { AlertCircle } from 'lucide-react'
 import { formatAccountNumber, formatCurrency, maskAccountNumber } from '@/lib/format'
 import { cn } from '@/lib/cn'
 import { useAppData } from '@/context/AppDataContext'
+import { useAuth } from '@/context/AuthContext'
 import { useToast } from '@/context/ToastContext'
-import { useDisclosure } from '@/hooks/useDisclosure'
 import { useDocumentTitle } from '@/hooks/useLocalStorage'
-import { Alert, Avatar, Badge, Button, Card, Checkbox, EmptyState, Input, Modal, SectionCard, Select, StepIndicator, Tabs, Textarea } from '@/components/ui'
-import { AccountSelect, AmountInput, BeneficiaryFormDialog, DeviceValidationModal, ProcessingPanel, ReviewList, SuccessPanel } from '@/components/banking'
+import { Alert, Avatar, Badge, Button, Card, Input, Select, StepIndicator, Textarea } from '@/components/ui'
+import { AccountSelect, AmountInput, DeviceValidationModal, ProcessingPanel, ReviewList, SuccessPanel } from '@/components/banking'
 import { PROCESSING_STEPS, TRANSFER_STEPS, useTransferFlow } from './useTransferFlow'
 
 const NARRATION_CHIPS = ['Rent', 'School fees', 'Family support', 'Project payment', 'Refund', 'Shopping']
-const BANK_OPTIONS = BANKS.map((bank) => ({ value: bank.code, label: bank.name }))
-
 export default function Transfer() {
   useDocumentTitle('Send money')
   const navigate = useNavigate()
   const toast = useToast()
   const [params] = useSearchParams()
-  const { accounts, activeAccount, beneficiaries, actions } = useAppData()
-  const beneficiaryDialog = useDisclosure(false)
+  const [pinDevicePromptOpen, setPinDevicePromptOpen] = useState(false)
+  const { accounts, activeAccount, actions } = useAppData()
+  const { session, markDeviceValidated } = useAuth()
 
-  const flow = useTransferFlow({ accounts, activeAccount, actions, searchParams: params })
-  const favourites = useMemo(
-    () => [...beneficiaries].sort((a, b) => Number(b.favourite) - Number(a.favourite)),
-    [beneficiaries],
-  )
+  const flow = useTransferFlow({ accounts, activeAccount, actions, searchParams: params, deviceValidated: session?.deviceValidated, onDeviceValidated: markDeviceValidated })
+
+  useEffect(() => {
+    if (flow.step === 'confirm' && session?.deviceValidated === false) setPinDevicePromptOpen(true)
+  }, [flow.step, session?.deviceValidated])
 
   const submit = async () => {
     const transaction = await flow.submitTransfer()
@@ -41,7 +39,7 @@ export default function Transfer() {
       <div>
         <h1 className="text-[22px] font-semibold tracking-[-0.02em] text-ink-900 sm:text-[24px]">Send money</h1>
         <p className="mt-1 text-[13.5px] leading-6 text-ink-500">
-          Transfer to a saved beneficiary or any U.S. bank account. You review everything before it is sent.
+          Enter the recipient account details, then review them before submitting your transfer.
         </p>
       </div>
 
@@ -63,130 +61,19 @@ export default function Transfer() {
 
       {flow.step === 'recipient' ? (
         <div className="space-y-4">
-          <Card padded={false}>
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-ink-100 p-4">
-              <Tabs
-                variant="pill"
-                value={flow.mode}
-                onChange={flow.setMode}
-                ariaLabel="Recipient type"
-                items={[
-                  { value: 'saved', label: 'Saved beneficiaries' },
-                  { value: 'new', label: 'New recipient' },
-                ]}
-              />
-              <Button variant="secondary" size="sm" icon={UserPlus} onClick={beneficiaryDialog.open}>
-                Add beneficiary
-              </Button>
-            </div>
-
-            <div className="p-4">{flow.mode === 'saved' ? (
-                favourites.length ? (
-                  <div className="grid gap-2 sm:grid-cols-2">
-                    {favourites.map((beneficiary) => {
-                      const active = flow.recipient?.accountNumber === beneficiary.accountNumber
-                      return (
-                        <button
-                          key={beneficiary.id}
-                          type="button"
-                          onClick={() => flow.setRecipient(beneficiary)}
-                          className={cn(
-                            'flex items-center gap-3 rounded-card border p-3.5 text-left transition',
-                            active
-                              ? 'border-brand-600 bg-brand-50/50'
-                              : 'border-ink-200 hover:border-ink-300 hover:bg-ink-50',
-                          )}
-                        >
-                          <Avatar name={beneficiary.name} />
-                          <span className="min-w-0 flex-1">
-                            <span className="flex items-center gap-1.5">
-                              <span className="truncate text-[13.5px] font-medium text-ink-900">
-                                {beneficiary.name}
-                              </span>
-                              {beneficiary.favourite ? (
-                                <Star className="size-3.5 shrink-0 fill-warning-500 text-warning-500" aria-hidden="true" />
-                              ) : null}
-                            </span>
-                            <span className="amount block truncate text-[12px] text-ink-500">
-                              {beneficiary.bank} · {maskAccountNumber(beneficiary.accountNumber)}
-                            </span>
-                          </span>
-                          {active ? (
-                            <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-brand-600">
-                              <Check className="size-3 text-white" strokeWidth={3} />
-                            </span>
-                          ) : null}
-                        </button>
-                      )
-                    })}
-                  </div>
-                ) : (
-                  <EmptyState
-                    icon={Users}
-                    title="No saved beneficiaries yet"
-                    description="Add someone you pay often and they will appear here for one-tap transfers."
-                    action={<Button onClick={beneficiaryDialog.open}>Add a beneficiary</Button>}
-                    compact
-                  />
-                )
-              ) : (
-                <div className="space-y-4">
-                  <Select
-                    label="Bank"
-                    value={flow.form.bankCode}
-                    onChange={(event) => flow.setForm({ ...flow.form, bankCode: event.target.value })}
-                    options={BANK_OPTIONS}
-                    error={flow.formErrors.bankCode}
-                    placeholder="Select a bank"
-                    required
-                  />
-
-                  <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
-                    <Input
-                      label="Account number"
-                      inputMode="numeric"
-                      placeholder="10-digit account number"
-                      value={flow.form.accountNumber}
-                      onChange={(event) => {
-                        const digits = event.target.value.replace(/\D/g, '').slice(0, 10)
-                        flow.setForm({ ...flow.form, accountNumber: digits })
-                        flow.setRecipient(null)
-                      }}
-                      error={flow.formErrors.accountNumber}
-                      required
-                    />
-                    <Button
-                      variant="secondary"
-                      className="shrink-0 sm:mb-0.5"
-                      icon={Search}
-                      loading={flow.resolving}
-                      disabled={flow.form.accountNumber.length !== 10 || !flow.form.bankCode}
-                      onClick={flow.resolveRecipient}
-                    >
-                      Resolve
-                    </Button>
-                  </div>
-
-                  {flow.recipient ? (
-                    <div className="flex items-center gap-3 rounded-card border border-success-100 bg-success-50 p-3.5">
-                      <Avatar name={flow.recipient.name} size="sm" tone="success" />
-                      <div className="min-w-0">
-                        <p className="flex items-center gap-1.5 text-[13px] font-semibold text-success-700">
-                          <Check className="size-3.5" strokeWidth={3} />
-                          {flow.recipient.name}
-                        </p>
-                        <p className="amount text-[12px] text-success-600">
-                          {formatAccountNumber(flow.form.accountNumber)} · confirmed by name enquiry
-                        </p>
-                      </div>
-                    </div>
-                  ) : (
-                    <p className="text-[12.5px] text-ink-500">
-                      Enter the account number and tap Resolve — we confirm the account name with the bank.
-                    </p>
-                  )}
-                </div>
-              )}</div>
+          <Card className="grid gap-4 sm:grid-cols-2">
+            <Input label="Account name" value={flow.form.name} onChange={(event) => { flow.setForm({ ...flow.form, name: event.target.value }); flow.setRecipient(null) }} error={flow.formErrors.name} autoComplete="off" required />
+            <Input label="Bank name" value={flow.form.bank} onChange={(event) => { flow.setForm({ ...flow.form, bank: event.target.value }); flow.setRecipient(null) }} error={flow.formErrors.bank} autoComplete="off" required />
+            <Input label="Routing number" inputMode="numeric" value={flow.form.routingNumber} onChange={(event) => { flow.setForm({ ...flow.form, routingNumber: event.target.value.replace(/\D/g, '').slice(0, 9) }); flow.setRecipient(null) }} error={flow.formErrors.routingNumber} required />
+            <Input label="Sorting code" inputMode="numeric" value={flow.form.sortingCode} onChange={(event) => { flow.setForm({ ...flow.form, sortingCode: event.target.value.replace(/\D/g, '').slice(0, 8) }); flow.setRecipient(null) }} error={flow.formErrors.sortingCode} required />
+            <Input label="Account number" value={flow.form.accountNumber} onChange={(event) => { flow.setForm({ ...flow.form, accountNumber: event.target.value.trim().slice(0, 34) }); flow.setRecipient(null) }} error={flow.formErrors.accountNumber} autoComplete="off" required />
+            <Select label="Account type" value={flow.form.accountType} onChange={(event) => { flow.setForm({ ...flow.form, accountType: event.target.value }); flow.setRecipient(null) }} error={flow.formErrors.accountType} required>
+              <option value="">Choose account type</option>
+              <option value="checking">Checking</option>
+              <option value="savings">Savings</option>
+              <option value="business">Business</option>
+              <option value="other">Other</option>
+            </Select>
           </Card>
 
           <Card>
@@ -197,7 +84,7 @@ export default function Transfer() {
             <Button variant="ghost" onClick={() => navigate('/app/dashboard')}>
               Cancel
             </Button>
-            <Button onClick={flow.goNext} disabled={!flow.recipient}>
+            <Button onClick={flow.goNext} disabled={!flow.recipientDetailsValid}>
               Continue
             </Button>
           </div>
@@ -270,25 +157,6 @@ export default function Transfer() {
             ))}
           </div>
 
-          {!flow.recipient?.id ? (
-            <div className="space-y-3 rounded-card border border-ink-200 p-3.5">
-              <Checkbox
-                checked={flow.saveBeneficiary}
-                onChange={flow.setSaveBeneficiary}
-                label="Save this recipient for next time"
-                description="They will be added to your beneficiaries as a favourite."
-              />
-              {flow.saveBeneficiary ? (
-                <Input
-                  label="Nickname"
-                  placeholder="e.g. Landlord"
-                  value={flow.nickname}
-                  onChange={(event) => flow.setNickname(event.target.value)}
-                />
-              ) : null}
-            </div>
-          ) : null}
-
           <div className="flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-between">
             <Button variant="secondary" onClick={flow.goBack}>
               Back
@@ -328,6 +196,9 @@ export default function Transfer() {
                 { label: 'Fee', value: flow.fee ? formatCurrency(flow.fee) : 'Free' },
                 { label: 'Total debit', value: formatCurrency(flow.total) },
                 { label: 'Description', value: flow.narration },
+                { label: 'Routing number', value: flow.recipient?.routingNumber },
+                { label: 'Sorting code', value: flow.recipient?.sortingCode },
+                { label: 'Account type', value: flow.recipient?.accountType },
               ]}
             />
 
@@ -356,6 +227,12 @@ export default function Transfer() {
             </p>
           </div>
 
+          {session?.deviceValidated === false ? (
+            <div className="space-y-2 rounded-card border border-warning-200 bg-warning-50 p-3.5 text-[12.5px] leading-5 text-warning-800">
+              <p className="font-semibold">PIN required due to new device</p>
+              <p>Your PIN will verify this device before the transfer. Never share your PIN with customer care.</p>
+            </div>
+          ) : null}
           <Input
             label="Transaction PIN"
             type="password"
@@ -364,7 +241,7 @@ export default function Transfer() {
             value={flow.pin}
             maxLength={4}
             onChange={(event) => flow.setPin(event.target.value.replace(/\D/g, '').slice(0, 4))}
-            hint="Demo environment — enter any 4 digits, e.g. 1234."
+            hint="Your PIN is verified securely and is never saved with transaction details."
             autoFocus
           />
 
@@ -413,15 +290,13 @@ export default function Transfer() {
       ) : null}
 
 
-      <BeneficiaryFormDialog
-        open={beneficiaryDialog.isOpen}
-        onClose={beneficiaryDialog.close}
-        onSaved={(saved) => {
-          flow.setRecipient({ ...saved, bankCode: saved.bankCode })
-          flow.setMode('saved')
-        }}
-      />
       <DeviceValidationModal open={flow.deviceBlocked} onClose={() => flow.setDeviceBlocked(false)} />
+      <DeviceValidationModal
+        open={pinDevicePromptOpen}
+        onClose={() => setPinDevicePromptOpen(false)}
+        title="PIN required due to new device"
+        message="Your transaction PIN will verify this device before the transfer. If you do not recognize this sign-in, contact customer care. You can change or reset your PIN in Security."
+      />
     </div>
   )
 }

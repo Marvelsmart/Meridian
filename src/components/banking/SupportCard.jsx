@@ -1,7 +1,6 @@
 import { LifeBuoy, Mail, MessageCircle, Phone } from 'lucide-react'
 import { cn } from '@/lib/cn'
-import { buildWhatsAppSupportLink, isWhatsAppSupportConfigured, SUPPORT_CHANNELS } from '@/config/support'
-import { useToast } from '@/context/ToastContext'
+import { SUPPORT_CHANNELS } from '@/config/support'
 import { Button } from '@/components/ui'
 
 /**
@@ -18,20 +17,10 @@ export function SupportCard({
   description = "We're here to help.",
   className = '',
 }) {
-  const toast = useToast()
-  const link = buildWhatsAppSupportLink()
-  const configured = isWhatsAppSupportConfigured()
   const compact = variant === 'compact'
 
   const openChat = () => {
-    if (link) {
-      window.open(link, '_blank', 'noopener,noreferrer')
-      return
-    }
-    toast.info(
-      'Support chat is not connected yet',
-      'The WhatsApp support number has not been set for this demo. Use the phone number or email below.',
-    )
+    window.dispatchEvent(new Event('northstar:open-support-chat'))
   }
 
   return (
@@ -53,15 +42,13 @@ export function SupportCard({
         size={compact ? 'sm' : 'md'}
         icon={MessageCircle}
         onClick={openChat}
-        aria-label="Chat with Support on WhatsApp"
+        aria-label="Open customer care chat"
       >
         Chat with Support
       </Button>
 
       <p className="mt-2 text-[11.5px] leading-5 text-ink-400">
-        {configured
-          ? 'Opens WhatsApp in a new tab.'
-          : 'Live chat opens in WhatsApp once the support number is configured.'}
+        In-app customer care chat.
       </p>
 
       {compact ? null : (

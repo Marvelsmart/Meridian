@@ -1,6 +1,5 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import * as api from '@/lib/api'
-import { BANKS } from '@/data/banks'
 import { formatCurrency } from '@/lib/format'
 
 export const TRANSFER_STEPS = [
@@ -31,22 +30,18 @@ function transferFee(amount) {
  * recipient → amount → description → review → confirm → processing → success.
  * Kept out of the page component so the screens stay presentational.
  */
-export function useTransferFlow({ accounts, activeAccount, actions, searchParams }) {
-  const [mode, setMode] = useState(searchParams.get('mode') === 'other-bank' ? 'new' : 'saved')
+export function useTransferFlow({ accounts, activeAccount, actions, searchParams, deviceValidated, onDeviceValidated }) {
   const [step, setStep] = useState('recipient')
   const [accountId, setAccountId] = useState(activeAccount?.id ?? accounts[0]?.id)
   const [recipient, setRecipient] = useState(null)
   const [amount, setAmount] = useState(searchParams.get('amount') ?? '')
   const [narration, setNarration] = useState('')
-  const [saveBeneficiary, setSaveBeneficiary] = useState(false)
-  const [nickname, setNickname] = useState('')
   const [pin, setPin] = useState('')
   const [error, setError] = useState(null)
   const [processingIndex, setProcessingIndex] = useState(0)
   const [result, setResult] = useState(null)
-  const [form, setForm] = useState({ bankCode: '', accountNumber: '' })
+  const [form, setForm] = useState({ name: '', bank: '', routingNumber: '', sortingCode: '', accountNumber: '', accountType: '' })
   const [formErrors, setFormErrors] = useState({})
-  const [resolving, setResolving] = useState(false)
   const [deviceBlocked, setDeviceBlocked] = useState(false)
 
   const selectedAccount = accounts.find((account) => account.id === accountId) ?? activeAccount
@@ -55,40 +50,26 @@ export function useTransferFlow({ accounts, activeAccount, actions, searchParams
   const total = amountValue + fee
   const stepIndex = TRANSFER_STEPS.findIndex((item) => item.value === step)
 
-  useEffect(() => {
-    const accountNumber = searchParams.get('account')
-    const name = searchParams.get('name')
-    if (accountNumber && name) {
-      setRecipient({ name, accountNumber, bank: 'Northstar Bank', bankCode: '000014' })
-      setForm({ bankCode: '000014', accountNumber })
-      setMode('new')
-    }
-  }, [searchParams])
-
-  const resolveRecipient = async () => {
-    setFormErrors({})
-    setError(null)
-    setResolving(true)
-    try {
-      const resolved = await api.resolveAccountName(form)
-      const bank = BANKS.find((item) => item.code === form.bankCode)
-      setRecipient({ ...resolved, bank: bank?.name ?? resolved.bank ?? 'Bank transfer', bankCode: form.bankCode })
-      return true
-    } catch (err) {
-      setFormErrors(err.fields ?? {})
-      setError(err.message)
-      setRecipient(null)
-      return false
-    } finally {
-      setResolving(false)
-    }
-  }
+  const recipientDetailsValid = ['name', 'bank', 'routingNumber', 'sortingCode', 'accountNumber', 'accountType']
+    .every((key) => String(form[key] ?? '').trim())
+    && /^\d{9}$/.test(form.routingNumber)
+    && /^\d{6,8}$/.test(form.sortingCode)
+    && form.accountNumber.trim().length >= 4
 
   const goNext = () => {
-    if (step === 'recipient' && !recipient) {
-      setError('Choose a saved beneficiary or resolve a new account before continuing.')
+    if (step === 'recipient' && !recipientDetailsValid) {
+      const errors = Object.fromEntries(['name', 'bank', 'routingNumber', 'sortingCode', 'accountNumber', 'accountType']
+        .filter((key) => !String(form[key] ?? '').trim())
+        .map((key) => [key, 'This field is required.']))
+      if (form.routingNumber && !/^\d{9}$/.test(form.routingNumber)) errors.routingNumber = 'Enter a 9-digit routing number.'
+      if (form.sortingCode && !/^\d{6,8}$/.test(form.sortingCode)) errors.sortingCode = 'Enter a 6 to 8 digit sorting code.'
+      if (form.accountNumber && form.accountNumber.trim().length < 4) errors.accountNumber = 'Enter at least 4 characters.'
+      setFormErrors(errors)
+      setError('Enter all recipient bank details to continue.')
       return
     }
+    if (step === 'recipient') setRecipient({ ...form, name: form.name.trim(), bank: form.bank.trim() })
+    setFormErrors({})
     if (step === 'amount') {
       if (!amountValue) return setError('Enter an amount to continue.')
       if (amountValue < 100) return setError('The minimum transfer amount is $100.')
@@ -127,23 +108,14 @@ export function useTransferFlow({ accounts, activeAccount, actions, searchParams
       700,
     )
     try {
+      if (deviceValidated === false) {
+        await api.validateCurrentDevice(pin)
+        onDeviceValidated?.()
+      }
       const [response] = await Promise.all([
-        actions.transfer({ accountId, amount, narration, recipient, beneficiaryId: recipient.id ?? null }),
+        actions.transfer({ accountId, amount, narration, recipientDetails: recipient, pin }),
         new Promise((resolve) => setTimeout(resolve, 2900)),
       ])
-
-      if (saveBeneficiary && !recipient.id) {
-        await actions
-          .addBeneficiary({
-            name: recipient.name,
-            nickname,
-            bank: recipient.bank,
-            bankCode: recipient.bankCode,
-            accountNumber: recipient.accountNumber,
-            favourite: true,
-          })
-          .catch(() => null)
-      }
 
       setResult(response.transaction)
       setStep('success')
@@ -160,24 +132,22 @@ export function useTransferFlow({ accounts, activeAccount, actions, searchParams
 
   const beginAuthorization = () => {
     setStep('confirm')
-    setDeviceBlocked(true)
     return true
   }
 
   const resetFlow = () => {
     setRecipient(null)
+    setForm({ name: '', bank: '', routingNumber: '', sortingCode: '', accountNumber: '', accountType: '' })
+    setFormErrors({})
     setAmount('')
     setNarration('')
     setPin('')
     setResult(null)
     setError(null)
-    setMode('saved')
     setStep('recipient')
   }
 
   return {
-    mode,
-    setMode,
     step,
     setStep,
     stepIndex,
@@ -189,10 +159,6 @@ export function useTransferFlow({ accounts, activeAccount, actions, searchParams
     setAmount,
     narration,
     setNarration,
-    saveBeneficiary,
-    setSaveBeneficiary,
-    nickname,
-    setNickname,
     pin,
     setPin,
     error,
@@ -203,13 +169,12 @@ export function useTransferFlow({ accounts, activeAccount, actions, searchParams
     setForm,
     formErrors,
     setFormErrors,
-    resolving,
+    recipientDetailsValid,
     deviceBlocked,
     selectedAccount,
     fee,
     total,
     amountValue,
-    resolveRecipient,
     goNext,
     goBack,
     submitTransfer,

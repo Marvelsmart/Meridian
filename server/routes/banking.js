@@ -1,20 +1,29 @@
 import { Router } from 'express'
 import crypto from 'node:crypto'
+import bcrypt from 'bcryptjs'
 import { z } from 'zod'
 import { Account, Beneficiary, Biller, BillPayment, Card, Device, Notification, Transaction, User } from '../models/index.js'
 import { requireAuth } from '../middleware/auth.js'
 import { requireValidatedDevice } from '../middleware/device.js'
-import { decryptSecret } from '../security/crypto.js'
+import { decryptSecret, encryptSecret } from '../security/crypto.js'
 import { ensureDemoUserData } from '../seed-demo-transactions.js'
 
 const router = Router(); router.use(requireAuth)
 const id = (value) => value && String(value)
 const safeCard = (card) => { const data = card.toObject ? card.toObject() : card; const { panCiphertext, cvvCiphertext, ...safe } = data; return { ...safe, maskedNumber: `•••• •••• •••• ${data.last4}` } }
 const amountSchema = z.object({ accountId: z.string(), amount: z.coerce.number().positive(), description: z.string().max(140).optional() })
+const recipientDetailsSchema = z.object({
+  name: z.string().trim().min(2).max(100), bank: z.string().trim().min(2).max(100),
+  routingNumber: z.string().regex(/^\d{9}$/), sortingCode: z.string().regex(/^\d{6,8}$/),
+  accountNumber: z.string().trim().min(4).max(34), accountType: z.enum(['checking', 'savings', 'business', 'other']),
+})
 const publicCard = (card) => safeCard(card)
 const publicUser = (user) => { const { passwordHash, transactionPinHash, ...safe } = user.toObject ? user.toObject() : user; return safe }
 const idString = (value) => value?._id ? String(value._id) : String(value)
-const normalizeTransaction = (transaction) => ({ ...transaction, id: idString(transaction), accountId: transaction.account ? idString(transaction.account) : transaction.accountId, date: transaction.date ?? transaction.createdAt })
+const normalizeTransaction = (transaction) => {
+  const { recipientDetailsCiphertext, ...safe } = transaction
+  return { ...safe, id: idString(transaction), accountId: transaction.account ? idString(transaction.account) : transaction.accountId, date: transaction.date ?? transaction.createdAt }
+}
 const normalizeTransactionForAccount = (transaction, accountId) => {
   const normalized = normalizeTransaction(transaction)
   if (transaction.visibility === 'shared' && accountId) normalized.accountId = String(accountId)
@@ -41,10 +50,12 @@ router.get('/transactions', async (req, res) => {
   const items = transactions.map((transaction) => normalizeTransactionForAccount(transaction, primaryAccount?._id)); res.json({ items, total: items.length, page: 1, pageSize: items.length, pageCount: 1 })
 })
 router.get('/transactions/:transactionId', async (req, res) => {
-  const item = await Transaction.findOne({ _id: req.params.transactionId, $or: [{ visibility: 'shared' }, { owner: req.user._id }] }).lean()
+  const item = await Transaction.findOne({ _id: req.params.transactionId, $or: [{ visibility: 'shared' }, { owner: req.user._id }] }).select('+recipientDetailsCiphertext').lean()
   if (!item) return res.status(404).json({ error: 'Transaction not found' })
   const primaryAccount = item.visibility === 'shared' ? await Account.findOne({ owner: req.user._id, primary: true }).select('_id').lean() : null
-  res.json(normalizeTransactionForAccount(item, primaryAccount?._id))
+  const normalized = normalizeTransactionForAccount(item, primaryAccount?._id)
+  if (item.recipientDetailsCiphertext) normalized.recipientDetails = JSON.parse(decryptSecret(item.recipientDetailsCiphertext))
+  res.json(normalized)
 })
 router.get('/notifications', async (req, res) => res.json(await Notification.find({ owner: req.user._id }).sort({ createdAt: -1 }).lean()))
 router.get('/beneficiaries', async (req, res) => res.json(await Beneficiary.find({ owner: req.user._id }).lean()))
@@ -57,9 +68,18 @@ router.get('/billers', async (req, res) => res.json(await Biller.find({ $or: [{ 
 async function movement(req, res, next, category, direction) {
   try {
     const input = amountSchema.parse(req.body); const account = await Account.findOne({ _id: input.accountId, owner: req.user._id }); if (!account) return res.status(404).json({ error: 'Account not found' })
+    let recipientDetails
+    if (category === 'transfer') {
+      recipientDetails = recipientDetailsSchema.parse(req.body.recipientDetails)
+      const user = await User.findById(req.user._id).select('+transactionPinHash')
+      if (!user?.transactionPinHash) return res.status(403).json({ code: 'transaction_pin_not_set', error: 'Set a transaction PIN in Security before sending a transfer.' })
+      if (!/^\d{4}$/.test(String(req.body.pin || '')) || !(await bcrypt.compare(String(req.body.pin), user.transactionPinHash))) {
+        return res.status(422).json({ code: 'invalid_transaction_pin', error: 'The transaction PIN is incorrect.' })
+      }
+    }
     const signed = direction === 'credit' ? input.amount : -input.amount; if (direction === 'debit' && account.available < input.amount) return res.status(422).json({ error: 'Insufficient available balance' })
     const reference = `${category.slice(0, 3).toUpperCase()}-${crypto.randomBytes(5).toString('hex').toUpperCase()}`; account.balance = Number((account.balance + signed).toFixed(2)); account.ledgerBalance = account.balance; account.available = account.balance; await account.save()
-    const transaction = await Transaction.create({ owner: req.user._id, visibility: 'private', account: account._id, type: direction, direction, category, description: input.description || category, amount: input.amount, reference, counterparty: req.body.recipient || req.body.provider || null, fee: Number(req.body.fee || 0), narration: req.body.narration || input.description })
+    const transaction = await Transaction.create({ owner: req.user._id, visibility: 'private', account: account._id, type: direction, direction, category, description: input.description || category, amount: input.amount, reference, counterparty: recipientDetails ? { name: recipientDetails.name, bank: recipientDetails.bank } : req.body.provider || null, recipientDetailsCiphertext: recipientDetails ? encryptSecret(JSON.stringify(recipientDetails)) : undefined, fee: Number(req.body.fee || 0), narration: req.body.narration || input.description })
     if (category === 'bills') await BillPayment.create({ owner: req.user._id, account: account._id, amount: input.amount, customerRef: req.body.customerRef, status: 'successful', reference, paidAt: new Date() })
     res.status(201).json({ transaction: normalizeTransaction(transaction.toObject()), account: normalizeAccount(account.toObject()) })
   } catch (error) { next(error) }
@@ -76,7 +96,17 @@ router.post('/cards', async (req, res) => { const account = await Account.findOn
 router.get('/cards', async (req, res) => res.json((await Card.find({ owner: req.user._id }).lean()).map(safeCard)))
 router.post('/cards/reveal', requireValidatedDevice, async (req, res) => { const card = await Card.findOne({ _id: req.body.cardId, owner: req.user._id }).select('+panCiphertext +cvvCiphertext'); if (!card) return res.status(404).json({ error: 'Card not found' }); res.json({ cardId: card.id, pan: decryptSecret(card.panCiphertext), cvv: decryptSecret(card.cvvCiphertext), expiry: card.expiry }) })
 router.get('/devices', async (req, res) => res.json(await Device.find({ owner: req.user._id }).lean()))
-router.post('/devices/:deviceId/validate', async (req, res) => { const device = await Device.findOneAndUpdate({ owner: req.user._id, deviceId: req.params.deviceId }, { trusted: true, lastSeenAt: new Date() }, { new: true }); if (!device) return res.status(404).json({ error: 'Device not found' }); res.json(device) })
+router.post('/devices/:deviceId/validate', async (req, res) => {
+  if (req.params.deviceId !== req.deviceId) return res.status(403).json({ error: 'Only the current device can be validated.' })
+  const user = await User.findById(req.user._id).select('+transactionPinHash')
+  if (!user?.transactionPinHash) return res.status(403).json({ code: 'transaction_pin_not_set', error: 'Set a transaction PIN in Security before sending a transfer.' })
+  if (!(await bcrypt.compare(String(req.body.pin || ''), user.transactionPinHash))) {
+    return res.status(422).json({ code: 'invalid_transaction_pin', error: 'The transaction PIN is incorrect.' })
+  }
+  const device = await Device.findOneAndUpdate({ owner: req.user._id, deviceId: req.deviceId }, { trusted: true, lastSeenAt: new Date() }, { new: true })
+  if (!device) return res.status(404).json({ error: 'Device not found' })
+  res.json(device)
+})
 router.delete('/devices/others', async (req, res) => { await Device.deleteMany({ owner: req.user._id, deviceId: { $ne: req.deviceId } }); res.json(await Device.find({ owner: req.user._id }).lean()) })
 router.delete('/devices/:id', async (req, res) => { await Device.deleteOne({ _id: req.params.id, owner: req.user._id }); res.json({ success: true }) })
 

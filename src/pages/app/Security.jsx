@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
-import { ShieldCheck, Smartphone, KeyRound } from 'lucide-react'
+import { ShieldCheck, KeyRound } from 'lucide-react'
 import { useAppData } from '@/context/AppDataContext'
 import { useToast } from '@/context/ToastContext'
 import { useDocumentTitle } from '@/hooks/useLocalStorage'
-import { ACTIVE_SESSIONS, LOGIN_ACTIVITY, SECURITY_TIPS, TWO_FACTOR_METHODS } from '@/data/security'
+import { LOGIN_ACTIVITY, SECURITY_TIPS } from '@/data/security'
 import { Button, Card, Input, SectionCard, Switch } from '@/components/ui'
 
 export default function Security() {
@@ -20,6 +20,8 @@ export default function Security() {
   })
   const [passwords, setPasswords] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' })
   const [saving, setSaving] = useState(false)
+  const [pinForm, setPinForm] = useState({ password: '', pin: '', confirmPin: '' })
+  const [savingPin, setSavingPin] = useState(false)
 
   useEffect(() => {
     if (!user?.security) return
@@ -47,6 +49,24 @@ export default function Security() {
       toast.error('Password update failed', error.message)
     } finally {
       setSaving(false)
+    }
+  }
+
+  const handlePinChange = async (event) => {
+    event.preventDefault()
+    if (!/^\d{4}$/.test(pinForm.pin) || pinForm.pin !== pinForm.confirmPin) {
+      toast.error('PIN not updated', 'Enter the same 4-digit PIN in both fields.')
+      return
+    }
+    setSavingPin(true)
+    try {
+      await actions.setTransactionPin({ password: pinForm.password, pin: pinForm.pin })
+      setPinForm({ password: '', pin: '', confirmPin: '' })
+      toast.success('Transaction PIN updated', 'Your new PIN is stored securely.')
+    } catch (error) {
+      toast.error('PIN not updated', error.message)
+    } finally {
+      setSavingPin(false)
     }
   }
 
@@ -119,6 +139,16 @@ export default function Security() {
           </form>
         </SectionCard>
       </div>
+
+      <SectionCard title="Change or reset transaction PIN" description="Verify your account password to set a new 4-digit transaction PIN">
+        <form onSubmit={handlePinChange} className="grid gap-3 sm:grid-cols-2">
+          <Input label="Account password" type="password" autoComplete="current-password" value={pinForm.password} onChange={(event) => setPinForm((current) => ({ ...current, password: event.target.value }))} required />
+          <span className="hidden sm:block" aria-hidden="true" />
+          <Input label="New transaction PIN" type="password" inputMode="numeric" autoComplete="new-password" maxLength={4} value={pinForm.pin} onChange={(event) => setPinForm((current) => ({ ...current, pin: event.target.value.replace(/\D/g, '').slice(0, 4) }))} required />
+          <Input label="Confirm new PIN" type="password" inputMode="numeric" autoComplete="new-password" maxLength={4} value={pinForm.confirmPin} onChange={(event) => setPinForm((current) => ({ ...current, confirmPin: event.target.value.replace(/\D/g, '').slice(0, 4) }))} required />
+          <div className="sm:col-span-2"><Button type="submit" icon={KeyRound} loading={savingPin} disabled={!pinForm.password || pinForm.pin.length !== 4 || pinForm.confirmPin.length !== 4}>Save transaction PIN</Button></div>
+        </form>
+      </SectionCard>
 
       <div className="grid gap-4 lg:grid-cols-2">
         <SectionCard title="Active sessions" description="Devices currently signed into your account">

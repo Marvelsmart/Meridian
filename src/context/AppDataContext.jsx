@@ -188,6 +188,7 @@ export function AppDataProvider({ children }) {
         await syncNotifications()
         return result
       }),
+      setTransactionPin: wrapped(async (payload) => api.setTransactionPin(payload)),
       revokeSession: wrapped(async (id) => {
         const sessions = await api.revokeSession(id)
         setState((prev) => ({ ...prev, sessions }))

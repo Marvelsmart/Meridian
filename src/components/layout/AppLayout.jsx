@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { ChevronRight, LogOut } from 'lucide-react'
 import { cn } from '@/lib/cn'
@@ -8,6 +8,8 @@ import { useAuth } from '@/context/AuthContext'
 import { Avatar, Drawer, Spinner } from '@/components/ui'
 import { ErrorState } from '@/components/ui/States'
 import { SupportCard } from '@/components/banking'
+import { DeviceValidationModal } from '@/components/banking'
+import { CustomerCareChat } from '@/components/banking/CustomerCareChat'
 import { Logo } from './Logo'
 import { Sidebar } from './Sidebar'
 import { Header } from './Header'
@@ -19,9 +21,21 @@ const ALL_NAV = NAV_GROUPS.flatMap((group) => group.items)
 /** Authenticated application shell: sidebar + header + mobile navigation. */
 export function AppLayout() {
   const { status, error, reload, user, unreadCount } = useAppData()
-  const { signOut } = useAuth()
+  const { signOut, session } = useAuth()
   const location = useLocation()
   const [moreOpen, setMoreOpen] = useState(false)
+  const [newDeviceAlertOpen, setNewDeviceAlertOpen] = useState(false)
+
+  useEffect(() => {
+    if (status !== 'ready' || session?.newDeviceLogin !== true) return
+    const alertKey = `northstar:new-device-alert:${session.token}`
+    if (!window.sessionStorage.getItem(alertKey)) setNewDeviceAlertOpen(true)
+  }, [status, session])
+
+  const dismissNewDeviceAlert = () => {
+    if (session?.token) window.sessionStorage.setItem(`northstar:new-device-alert:${session.token}`, 'dismissed')
+    setNewDeviceAlertOpen(false)
+  }
 
   const title = useMemo(() => {
     const match = ALL_NAV.find((item) => location.pathname.startsWith(item.to))
@@ -67,6 +81,9 @@ export function AppLayout() {
       </div>
 
       <MobileNav onMore={() => setMoreOpen(true)} />
+
+      <DeviceValidationModal open={newDeviceAlertOpen} onClose={dismissNewDeviceAlert} />
+      <CustomerCareChat />
 
       <Drawer open={moreOpen} onClose={() => setMoreOpen(false)} side="bottom" title="More" description="Everything else you can do with Northstar">
         <div className="flex items-center gap-3 rounded-card border border-ink-200 p-3.5">
