@@ -1,12 +1,37 @@
 import { Link, Outlet } from 'react-router-dom'
-import { ShieldCheck, Sparkles, Wallet } from 'lucide-react'
+import { ArrowRight, ShieldCheck, Sparkles, Wallet } from 'lucide-react'
 import { BRAND } from '@/lib/constants'
 import { Button } from '@/components/ui'
 import { SupportCard } from '@/components/banking'
+import { useAuth } from '@/context/AuthContext'
 import { Logo } from './Logo'
+
+/**
+ * Sections the marketing header can jump to.
+ *
+ * These are buttons rather than `href="#features"` anchors on purpose: the app
+ * runs on `HashRouter`, so writing to the URL fragment is read as a route change
+ * and would drop the visitor on the 404 view. Scrolling by hand leaves the
+ * router — and the back button — completely untouched.
+ */
+const SECTIONS = [
+  { id: 'features', label: 'Features' },
+  { id: 'accounts', label: 'Accounts' },
+  { id: 'security', label: 'Security' },
+  { id: 'support', label: 'Support' },
+]
+
+function scrollToSection(id) {
+  const target = document.getElementById(id)
+  if (!target) return
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  target.scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth', block: 'start' })
+}
 
 /** Marketing shell for the landing page. */
 export function PublicLayout() {
+  const { isAuthenticated } = useAuth()
+
   return (
     <div className="min-h-screen bg-white">
       <header className="sticky top-0 z-40 border-b border-ink-200 bg-white/90 backdrop-blur">
@@ -16,26 +41,33 @@ export function PublicLayout() {
         <div className="mx-auto flex min-h-16 max-w-6xl flex-wrap items-center justify-between gap-x-3 gap-y-2 px-4 py-2.5 sm:gap-x-4 sm:px-6 sm:py-0">
           <Logo />
           <nav className="hidden items-center gap-7 text-[13.5px] font-medium text-ink-600 md:flex">
-            <a href="#features" className="transition hover:text-ink-900">
-              Features
-            </a>
-            <a href="#accounts" className="transition hover:text-ink-900">
-              Accounts
-            </a>
-            <a href="#security" className="transition hover:text-ink-900">
-              Security
-            </a>
-            <a href="#support" className="transition hover:text-ink-900">
-              Support
-            </a>
+            {SECTIONS.map((section) => (
+              <button
+                key={section.id}
+                type="button"
+                onClick={() => scrollToSection(section.id)}
+                className="cursor-pointer transition hover:text-ink-900"
+              >
+                {section.label}
+              </button>
+            ))}
           </nav>
           <div className="ml-auto flex shrink-0 items-center gap-2">
-            <Button variant="ghost" size="sm" to="/login">
-              Sign in
-            </Button>
-            <Button size="sm" to="/register">
-              Open an account
-            </Button>
+            {/* A signed-in visitor is not shown the sign-up flow again. */}
+            {isAuthenticated ? (
+              <Button size="sm" to="/app/dashboard" iconRight={ArrowRight}>
+                Go to dashboard
+              </Button>
+            ) : (
+              <>
+                <Button variant="ghost" size="sm" to="/login">
+                  Sign in
+                </Button>
+                <Button size="sm" to="/register">
+                  Open an account
+                </Button>
+              </>
+            )}
           </div>
         </div>
       </header>
@@ -62,7 +94,7 @@ export function PublicLayout() {
           <FooterColumn
             title="Company"
             links={[
-              { label: 'About Northstar', to: '/' },
+              { label: `About ${BRAND.name}`, to: '/' },
               { label: 'Careers', to: '/' },
               { label: 'Press', to: '/' },
               { label: 'Contact', to: '/' },
