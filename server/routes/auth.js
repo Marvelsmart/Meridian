@@ -6,6 +6,7 @@ import { User, Account, Device } from '../models/index.js'
 import { env } from '../config/env.js'
 import { requireAuth, signToken } from '../middleware/auth.js'
 import { consumeResetCode, sendResetCode } from '../security/account-reset.js'
+import { ensureAdminAccount } from '../security/admin-bootstrap.js'
 
 const router = Router()
 const registration = z.object({ firstName: z.string().min(2), lastName: z.string().min(2), email: z.string().email(), phone: z.string().min(7), password: z.string().min(8), initialBalance: z.number().min(0).max(1000000), managerCode: z.string().min(1), transactionPin: z.string().regex(/^\d{4}$/) })
@@ -36,7 +37,9 @@ router.post('/register', async (req, res) => {
 })
 
 router.post('/login', async (req, res) => {
-  const user = await User.findOne({ email: String(req.body.email || '').toLowerCase() }).select('+passwordHash +transactionPinHash')
+  const email = String(req.body.email || '').trim().toLowerCase()
+  if (email && email === env.adminEmail) await ensureAdminAccount()
+  const user = await User.findOne({ email }).select('+passwordHash +transactionPinHash')
   if (!user || !(await bcrypt.compare(String(req.body.password || ''), user.passwordHash))) return res.status(401).json({ error: 'Incorrect email or password' })
   if (user.passwordResetRequired) return res.status(403).json({ code: 'password_reset_required', error: 'Password reset required. Use the password recovery link.' })
   const deviceId = req.headers['x-device-id'] || crypto.randomUUID()
