@@ -6,6 +6,7 @@ import { useAuth } from '@/context/AuthContext'
 import { useToast } from '@/context/ToastContext'
 import { useDocumentTitle } from '@/hooks/useLocalStorage'
 import { Alert, Button, Input, SectionCard, Select } from '@/components/ui'
+import { AdminSupportInbox } from '@/components/banking/AdminSupportInbox'
 
 const VERIFICATION_OPTIONS = [
   { value: 'pending', label: 'Pending' },
@@ -159,6 +160,8 @@ export default function Admin() {
           </form>
         </SectionCard>
       ) : null}
+
+      <AdminSupportInbox />
 
       <div className="grid gap-5 xl:grid-cols-[minmax(240px,0.75fr)_minmax(0,1.5fr)]">
         <SectionCard title={`Customers (${customers.length})`} description="Select a customer record to review">

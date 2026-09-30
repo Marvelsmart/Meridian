@@ -2,7 +2,7 @@ import { Router } from 'express'
 import bcrypt from 'bcryptjs'
 import crypto from 'node:crypto'
 import { z } from 'zod'
-import { Account, AccountResetToken, AdminAuditLog, Card, Notification, User } from '../models/index.js'
+import { Account, AccountResetToken, AdminAuditLog, Card, Notification, SupportConversation, SupportMessage, User } from '../models/index.js'
 import { requireAdmin, requireAuth } from '../middleware/auth.js'
 import { env } from '../config/env.js'
 import { sendResetCode } from '../security/account-reset.js'
@@ -168,6 +168,46 @@ router.post('/card-requests/:id/review', async (req, res) => {
   await recordAdminAction(req, `card.${wasFreeze ? 'freeze' : 'unfreeze'}_${outcome}`, 'card', card._id, { status: card.status })
   await Notification.create({ owner: card.owner, category: 'card', title: `Card ${wasFreeze ? 'freeze' : 'unfreeze'} request ${decision === 'approve' ? 'approved' : 'declined'}`, body: `${card.nickname || 'Your card'} status is now ${card.status}.`, read: false, important: true })
   res.json({ card })
+})
+
+router.get('/support/conversations', async (req, res) => {
+  const conversations = await SupportConversation.find(req.query.status === 'closed' ? { status: 'closed' } : req.query.status === 'all' ? {} : { status: 'open' })
+    .populate('owner', 'firstName lastName email')
+    .sort({ lastMessageAt: -1 })
+    .limit(300)
+    .lean()
+  res.json({ conversations })
+})
+
+router.get('/support/conversations/:id/messages', async (req, res) => {
+  const conversation = await SupportConversation.findById(req.params.id)
+  if (!conversation) return res.status(404).json({ error: 'Conversation not found.' })
+  conversation.unreadForAdmin = 0
+  await conversation.save()
+  const messages = await SupportMessage.find({ conversation: conversation._id }).sort({ createdAt: -1 }).limit(200).lean()
+  res.json({ messages: messages.reverse(), conversation })
+})
+
+router.post('/support/conversations/:id/messages', async (req, res) => {
+  const input = z.object({ body: z.string().trim().min(1).max(4000) }).strict().parse(req.body)
+  const conversation = await SupportConversation.findById(req.params.id)
+  if (!conversation) return res.status(404).json({ error: 'Conversation not found.' })
+  const message = await SupportMessage.create({ conversation: conversation._id, owner: conversation.owner, sender: req.user._id, senderRole: 'admin', body: input.body })
+  conversation.status = 'open'
+  conversation.lastMessage = input.body
+  conversation.lastMessageAt = message.createdAt
+  conversation.lastMessageFrom = 'admin'
+  conversation.unreadForCustomer += 1
+  conversation.unreadForAdmin = 0
+  await conversation.save()
+  res.status(201).json({ conversation, message })
+})
+
+router.patch('/support/conversations/:id', async (req, res) => {
+  const { status } = z.object({ status: z.enum(['open', 'closed']) }).strict().parse(req.body)
+  const conversation = await SupportConversation.findByIdAndUpdate(req.params.id, { $set: { status } }, { new: true })
+  if (!conversation) return res.status(404).json({ error: 'Conversation not found.' })
+  res.json({ conversation })
 })
 
 export { router as adminRouter }

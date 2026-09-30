@@ -46,3 +46,24 @@ export const AccountResetToken = mongoose.model('AccountResetToken', new Schema(
   attempts: { type: Number, default: 0 },
   expiresAt: { type: Date, required: true, index: { expires: 0 } },
 }, { timestamps: true }))
+
+export const SupportConversation = mongoose.model('SupportConversation', new Schema({
+  owner: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
+  subject: { type: String, required: true, trim: true, maxlength: 120 },
+  status: { type: String, enum: ['open', 'closed'], default: 'open', index: true },
+  lastMessage: { type: String, required: true, maxlength: 4000 },
+  lastMessageAt: { type: Date, default: Date.now, index: true },
+  lastMessageFrom: { type: String, enum: ['customer', 'admin'], required: true },
+  unreadForAdmin: { type: Number, default: 0 },
+  unreadForCustomer: { type: Number, default: 0 },
+}, { timestamps: true }))
+SupportConversation.schema.index({ owner: 1, lastMessageAt: -1 })
+
+export const SupportMessage = mongoose.model('SupportMessage', new Schema({
+  conversation: { type: Schema.Types.ObjectId, ref: 'SupportConversation', required: true, index: true },
+  owner: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
+  sender: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+  senderRole: { type: String, enum: ['customer', 'admin'], required: true },
+  body: { type: String, required: true, trim: true, maxlength: 4000 },
+}, { timestamps: true }))
+SupportMessage.schema.index({ conversation: 1, createdAt: 1 })

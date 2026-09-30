@@ -186,3 +186,11 @@ export async function adminResetCustomerPin(id) { return requestBackend(`/admin/
 export async function adminResetCustomerPassword(id) { return requestBackend(`/admin/customers/${encodeURIComponent(id)}/reset-password`, post({})) }
 export async function adminListCardRequests() { return requestBackend('/admin/card-requests') }
 export async function adminReviewCardRequest(id, decision) { return requestBackend(`/admin/card-requests/${encodeURIComponent(id)}/review`, post({ decision })) }
+export async function listSupportConversations() { return requestBackend('/support/conversations') }
+export async function createSupportConversation(payload) { return requestBackend('/support/conversations', post(payload)) }
+export async function getSupportMessages(id) { return requestBackend(`/support/conversations/${encodeURIComponent(id)}/messages`) }
+export async function sendSupportMessage(id, body) { return requestBackend(`/support/conversations/${encodeURIComponent(id)}/messages`, post({ body })) }
+export async function adminListSupportConversations(status = 'open') { return requestBackend(`/admin/support/conversations?status=${encodeURIComponent(status)}`) }
+export async function adminGetSupportMessages(id) { return requestBackend(`/admin/support/conversations/${encodeURIComponent(id)}/messages`) }
+export async function adminSendSupportMessage(id, body) { return requestBackend(`/admin/support/conversations/${encodeURIComponent(id)}/messages`, post({ body })) }
+export async function adminSetSupportConversationStatus(id, status) { return requestBackend(`/admin/support/conversations/${encodeURIComponent(id)}`, { method: 'PATCH', body: JSON.stringify({ status }) }) }

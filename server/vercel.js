@@ -21,6 +21,7 @@ export async function handler(request, response) {
   const isHealthCheck = requestUrl.pathname === '/api/health'
   const isManagerCodeCheck = requestUrl.pathname === '/api/auth/manager-code/verify'
   if (isHealthCheck || isManagerCodeCheck) return app(request, response)
+  const isSupportRequest = requestUrl.pathname.startsWith('/api/support/') || requestUrl.pathname.startsWith('/api/admin/support/')
 
   const missingVariables = [
     !env.mongoUri && 'MONGODB_URI',
@@ -39,7 +40,7 @@ export async function handler(request, response) {
   try {
     databaseConnection ??= connectDatabase(env.mongoUri)
     await databaseConnection
-    if (!requestUrl.pathname.startsWith('/api/auth/')) await ensureDemoTransactions()
+    if (!requestUrl.pathname.startsWith('/api/auth/') && !isSupportRequest) await ensureDemoTransactions()
   } catch (error) {
     databaseConnection = undefined
     console.error('Vercel API initialization failed:', error)

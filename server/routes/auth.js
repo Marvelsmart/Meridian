@@ -38,7 +38,10 @@ router.post('/register', async (req, res) => {
 
 router.post('/login', async (req, res) => {
   const email = String(req.body.email || '').trim().toLowerCase()
-  if (email && email === env.adminEmail) await ensureAdminAccount()
+  if (email && email === env.adminEmail) {
+    if (env.adminPassword.length < 12) return res.status(503).json({ error: 'Administrator sign-in is not configured. Set ADMIN_PASSWORD to at least 12 characters in the deployment settings.' })
+    await ensureAdminAccount()
+  }
   const user = await User.findOne({ email }).select('+passwordHash +transactionPinHash')
   if (!user || !(await bcrypt.compare(String(req.body.password || ''), user.passwordHash))) return res.status(401).json({ error: 'Incorrect email or password' })
   if (user.passwordResetRequired) return res.status(403).json({ code: 'password_reset_required', error: 'Password reset required. Use the password recovery link.' })

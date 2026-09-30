@@ -1,6 +1,5 @@
 import { CreditCard, FileText, LifeBuoy, MessageCircle, ShieldCheck, Wallet } from 'lucide-react'
 import { useDocumentTitle } from '@/hooks/useLocalStorage'
-import { ZANGI_SUPPORT_NUMBER } from '@/config/support'
 import { SectionCard } from '@/components/ui'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { SupportCard } from '@/components/banking'
@@ -12,7 +11,7 @@ const HELP_TOPICS = [
   { icon: ShieldCheck, title: 'Account security', body: 'Suspicious sign-in, password reset or device access.' },
 ]
 
-/** Support entry point. Live chat is the front-end only — no chat backend yet. */
+/** Support entry point for persistent customer-care conversations. */
 export default function Support() {
   useDocumentTitle('Support')
 
@@ -20,7 +19,7 @@ export default function Support() {
     <div className="space-y-5">
       <PageHeader
         title="Customer Support"
-          description="Open the in-app customer-care panel for account assistance."
+        description="Open the in-app customer-care panel for account assistance."
         actions={<SupportCard variant="compact" />}
       />
 
@@ -48,17 +47,15 @@ export default function Support() {
         </SectionCard>
       </div>
 
-      <SectionCard title="Customer care" description="Support contact and messaging status">
+      <SectionCard title="Customer care" description="Private support conversations stay in your account">
         <ul className="space-y-2 text-[13px] leading-6 text-ink-600">
           <li className="flex gap-2">
             <MessageCircle className="mt-1 size-3.5 shrink-0 text-ink-400" aria-hidden="true" />
-            <span>
-              Zangi customer-care number: <strong>{ZANGI_SUPPORT_NUMBER}</strong>.
-            </span>
+            <span>Start a new conversation or return to a previous thread from the customer-care panel.</span>
           </li>
           <li className="flex gap-2">
             <LifeBuoy className="mt-1 size-3.5 shrink-0 text-ink-400" aria-hidden="true" />
-            <span>The in-app chat panel is ready, but live message delivery still needs the Zangi messaging service/API credentials.</span>
+            <span>Replies from customer care appear in the same conversation. Never send your password or transaction PIN in chat.</span>
           </li>
         </ul>
       </SectionCard>

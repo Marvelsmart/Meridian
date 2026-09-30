@@ -2,7 +2,7 @@ import { Router } from 'express'
 import crypto from 'node:crypto'
 import bcrypt from 'bcryptjs'
 import { z } from 'zod'
-import { Account, Beneficiary, Biller, BillPayment, Card, Device, Notification, Transaction, User } from '../models/index.js'
+import { Account, Beneficiary, Biller, BillPayment, Card, Device, Notification, SupportConversation, SupportMessage, Transaction, User } from '../models/index.js'
 import { requireAuth } from '../middleware/auth.js'
 import { requireValidatedDevice } from '../middleware/device.js'
 import { decryptSecret, encryptSecret } from '../security/crypto.js'
@@ -59,6 +59,49 @@ router.get('/transactions/:transactionId', async (req, res) => {
 })
 router.get('/notifications', async (req, res) => res.json(await Notification.find({ owner: req.user._id }).sort({ createdAt: -1 }).lean()))
 router.get('/beneficiaries', async (req, res) => res.json(await Beneficiary.find({ owner: req.user._id }).lean()))
+
+const supportMessageSchema = z.object({ body: z.string().trim().min(1).max(4000) }).strict()
+const supportSubjectSchema = z.object({ subject: z.string().trim().min(1).max(120), body: z.string().trim().min(1).max(4000) }).strict()
+
+router.get('/support/conversations', async (req, res) => {
+  const conversations = await SupportConversation.find({ owner: req.user._id }).sort({ lastMessageAt: -1 }).limit(100).lean()
+  res.json({ conversations })
+})
+router.post('/support/conversations', async (req, res) => {
+  const input = supportSubjectSchema.parse(req.body)
+  const conversation = await SupportConversation.create({
+    owner: req.user._id,
+    subject: input.subject,
+    lastMessage: input.body,
+    lastMessageFrom: 'customer',
+    unreadForAdmin: 1,
+  })
+  const message = await SupportMessage.create({ conversation: conversation._id, owner: req.user._id, sender: req.user._id, senderRole: 'customer', body: input.body })
+  res.status(201).json({ conversation, message })
+})
+router.get('/support/conversations/:id/messages', async (req, res) => {
+  const conversation = await SupportConversation.findOne({ _id: req.params.id, owner: req.user._id })
+  if (!conversation) return res.status(404).json({ error: 'Conversation not found.' })
+  conversation.unreadForCustomer = 0
+  await conversation.save()
+  const messages = await SupportMessage.find({ conversation: conversation._id }).sort({ createdAt: -1 }).limit(200).lean()
+  res.json({ messages: messages.reverse(), conversation })
+})
+router.post('/support/conversations/:id/messages', async (req, res) => {
+  const input = supportMessageSchema.parse(req.body)
+  const conversation = await SupportConversation.findOne({ _id: req.params.id, owner: req.user._id })
+  if (!conversation) return res.status(404).json({ error: 'Conversation not found.' })
+  const message = await SupportMessage.create({ conversation: conversation._id, owner: req.user._id, sender: req.user._id, senderRole: 'customer', body: input.body })
+  conversation.status = 'open'
+  conversation.lastMessage = input.body
+  conversation.lastMessageAt = message.createdAt
+  conversation.lastMessageFrom = 'customer'
+  conversation.unreadForAdmin += 1
+  conversation.unreadForCustomer = 0
+  await conversation.save()
+  res.status(201).json({ conversation, message })
+})
+
 router.post('/beneficiaries', async (req, res) => res.status(201).json(await Beneficiary.create({ ...req.body, owner: req.user._id })))
 router.patch('/beneficiaries/:id', async (req, res) => { const item = await Beneficiary.findOneAndUpdate({ _id: req.params.id, owner: req.user._id }, { $set: req.body }, { new: true }); if (!item) return res.status(404).json({ error: 'Beneficiary not found' }); res.json(item) })
 router.delete('/beneficiaries/:id', async (req, res) => { const result = await Beneficiary.deleteOne({ _id: req.params.id, owner: req.user._id }); if (!result.deletedCount) return res.status(404).json({ error: 'Beneficiary not found' }); res.json({ id: req.params.id }) })

@@ -24,11 +24,11 @@ CLIENT_ORIGIN=https://your-project.vercel.app
 VITE_API_URL=
 ```
 
-Set `ADMIN_EMAIL` and `ADMIN_PASSWORD` to the separate administrator Gmail and a strong password of at least 12 characters. On API startup, the backend creates or updates that MongoDB user and stores only a bcrypt password hash. These variables are server-only; do not prefix them with `VITE_`. The administrator signs in directly at `/admin`. Do not use customer signup for the admin account.
+Set `ADMIN_EMAIL` and `ADMIN_PASSWORD` to the separate administrator email and a unique password of at least 12 characters. On the first admin sign-in at `/admin`, the backend creates or updates that MongoDB user and stores only a bcrypt password hash. These variables are server-only; do not prefix them with `VITE_`. Do not use customer signup for the admin account; the configured admin email is reserved from customer registration.
 
 Configure Resend with a verified sending domain for password recovery and staff-triggered PIN reset links. Reset codes are short-lived, single-use, stored hashed, and never returned by the API.
 
-The Zangi number is configured in `src/config/support.js`. The in-app panel does not redirect to Zangi, but live message delivery requires a Zangi messaging/API integration and server-side credentials; the number by itself cannot provide that connection.
+Customer support conversations are stored in MongoDB and shared between each signed-in customer's chat panel and the admin inbox. Both sides poll for replies, and conversation history remains available for follow-up. No third-party messaging credentials are required.
 
 Leave `VITE_API_URL` empty when frontend and API are deployed together. The frontend then calls same-origin `/api` routes.
 
