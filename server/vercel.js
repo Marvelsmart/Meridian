@@ -3,14 +3,24 @@ import { createApp } from './app.js'
 import { env } from './config/env.js'
 import { ensureDemoTransactions } from './seed-demo-transactions.js'
 
-if (!env.mongoUri || !env.jwtSecret) {
-  throw new Error('MONGODB_URI and JWT_SECRET must be configured.')
-}
-
 const app = createApp()
 let databaseConnection
 
 export async function handler(request, response) {
+  const missingVariables = [
+    !env.mongoUri && 'MONGODB_URI',
+    !env.jwtSecret && 'JWT_SECRET',
+  ].filter(Boolean)
+  if (missingVariables.length) {
+    response.statusCode = 503
+    response.setHeader('Content-Type', 'application/json; charset=utf-8')
+    response.end(JSON.stringify({
+      error: 'The API is not configured for this deployment.',
+      missingEnvironmentVariables: missingVariables,
+    }))
+    return
+  }
+
   databaseConnection ??= connectDatabase(env.mongoUri)
   await databaseConnection
   await ensureDemoTransactions()
