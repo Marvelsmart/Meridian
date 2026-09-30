@@ -3,7 +3,7 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "description": "Premium digital banking frontend (frontend-only, mock data layer)",
+  "description": "Northstar Bank — digital banking frontend (React + Vite) with an Express/MongoDB API",
   "scripts": {
     "dev": "vite",
     "build": "vite build",

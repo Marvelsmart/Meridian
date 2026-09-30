@@ -13,9 +13,9 @@ const TONE_ICONS = {
 /**
  * Customer-facing identity verification status.
  *
- * The states (Verified / Pending / Under review / Required) exist so the UX
- * matches what a U.S. retail bank would ask of a new customer. In this demo
- * everything is simulated — no SSN check, no document review, no bureau lookup.
+ * The states (Verified / Pending / Under review / Required) follow the checks a
+ * U.S. retail bank asks of a new customer. The status the customer selects is
+ * recorded on their profile and reviewed by the bank.
  */
 export function VerificationCard({
   status = DEFAULT_VERIFICATION_STATUS,
@@ -60,7 +60,7 @@ export function VerificationCard({
       {onStatusChange && options.length ? (
         <div className="mt-4 border-t border-ink-100 pt-3">
           <Select
-            label="Preview a verification state (demo)"
+            label="Verification status"
             value={status}
             onChange={(event) => onStatusChange(event.target.value)}
             options={options}
@@ -70,7 +70,7 @@ export function VerificationCard({
       ) : null}
 
       <p className="mt-3 text-[11.5px] leading-5 text-ink-400">
-        Simulated for this demo — no documents, SSN or third-party checks are performed.
+        Your verification status is saved to your profile and reviewed by our team.
       </p>
     </div>
   )

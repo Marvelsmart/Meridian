@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { CheckCircle2, ShieldCheck } from 'lucide-react'
 import { useToast } from '@/context/ToastContext'
+import { useAuth } from '@/context/AuthContext'
 import * as api from '@/lib/api'
 import { BRAND } from '@/lib/constants'
 import { useDocumentTitle } from '@/hooks/useLocalStorage'
@@ -12,6 +13,7 @@ export default function ResetPassword() {
   useDocumentTitle('Choose a new password')
   const navigate = useNavigate()
   const toast = useToast()
+  const { isAuthenticated, resetLocalData } = useAuth()
   const [params] = useSearchParams()
   const [values, setValues] = useState({
     code: params.get('code') ?? '',
@@ -37,6 +39,7 @@ export default function ResetPassword() {
     setFormError(null)
     try {
       await api.resetPassword(values)
+      if (isAuthenticated) resetLocalData()
       setDone(true)
       toast.success('Password updated', 'Sign in with your new password.')
     } catch (error) {
@@ -52,7 +55,7 @@ export default function ResetPassword() {
       <AuthLayout title="Password updated" subtitle="Your new password is ready to use." backTo="/login" backLabel="Back to sign in">
         <div className="space-y-5">
           <Alert tone="success" icon={CheckCircle2} title="All set">
-            Your Northstar password was changed successfully. For your security, all other devices were left signed out.
+            Your Northstar password was changed successfully. Sign in again with the new password.
           </Alert>
           <Button size="lg" fullWidth onClick={() => navigate('/login', { replace: true })}>
             Sign in

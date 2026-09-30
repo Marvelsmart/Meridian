@@ -6,5 +6,7 @@ export const env = {
   jwtSecret: process.env.JWT_SECRET || '',
   managerCode: process.env.BANK_MANAGER_CODE || '',
   clientOrigin: process.env.CLIENT_ORIGIN || 'http://localhost:5173',
-  whatsappSupportNumber: process.env.WHATSAPP_SUPPORT_NUMBER || '',
+  adminEmails: (process.env.ADMIN_EMAILS || '').split(',').map((email) => email.trim().toLowerCase()).filter(Boolean),
+  resendApiKey: process.env.RESEND_API_KEY || '',
+  emailFrom: process.env.EMAIL_FROM || '',
 }

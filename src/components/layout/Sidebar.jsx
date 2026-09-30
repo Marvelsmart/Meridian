@@ -11,7 +11,7 @@ import { Logo } from './Logo'
 /** Desktop sidebar: brand, grouped navigation, support + account footer. */
 export function Sidebar({ className = '' }) {
   const { user, unreadCount } = useAppData()
-  const { signOut } = useAuth()
+  const { signOut, user: authUser } = useAuth()
 
   return (
     <aside
@@ -25,7 +25,7 @@ export function Sidebar({ className = '' }) {
       </div>
 
       <nav className="min-h-0 flex-1 overflow-y-auto px-3 py-5">
-        {NAV_GROUPS.map((group) => (
+        {NAV_GROUPS.map((group) => ({ ...group, items: group.items.filter((item) => !item.adminOnly || authUser?.role === 'admin') })).map((group) => (
           <div key={group.title} className="mb-6 last:mb-0">
             <p className="px-3 pb-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-ink-400">
               {group.title}
@@ -70,7 +70,7 @@ export function Sidebar({ className = '' }) {
       </nav>
 
       <div className="shrink-0 border-t border-ink-100 p-3">
-        <SupportCard variant="compact" title="Need help?" description="Chat with Support on WhatsApp." />
+        <SupportCard variant="compact" title="Need help?" description="Open the customer care chat." />
 
         <div className="mt-3 flex items-center gap-3 rounded-card p-2">
           <Avatar name={`${user?.firstName ?? ''} ${user?.lastName ?? ''}`} size="sm" tone="brand" />

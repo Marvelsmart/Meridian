@@ -1,7 +1,7 @@
 /**
  * U.S. phone-number helpers.
  *
- * Country context for this demo bank is the United States (+1), so the signup
+ * Country context for the bank is the United States (+1), so the signup
  * and profile fields accept every format a U.S. customer would realistically
  * type and normalize the value internally:
  *

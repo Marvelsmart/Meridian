@@ -10,7 +10,7 @@ const SURFACES = {
   slate: 'bg-ink-600',
 }
 
-/** Simulated card face — invented numbers only, never real card data. */
+/** Card face — renders the stored card record. The app never holds real card numbers. */
 export function CardVisual({ card, revealed = false, onToggleReveal = null, className = '', compact = false }) {
   const meta = CARD_STATUS_META[card.status] ?? CARD_STATUS_META.active
   const frozen = card.status === 'frozen'

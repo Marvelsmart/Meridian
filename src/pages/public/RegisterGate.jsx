@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { AlertCircle, KeyRound, ShieldCheck } from 'lucide-react'
-import { isValidManagerCode, unlockManagerCode } from '@/config/demo'
+import { unlockManagerCode } from '@/config/signup'
+import * as api from '@/lib/api'
 import { useToast } from '@/context/ToastContext'
 import { useDocumentTitle } from '@/hooks/useLocalStorage'
 import { Alert, Button, Input } from '@/components/ui'
@@ -12,10 +13,9 @@ import { AuthLayout } from '@/components/layout/AuthLayout'
  *
  *   /register  →  this gate  →  /register/account (the signup form)
  *
- * Frontend/demo gate only: the code is a fixed fictional value, there is no
- * administrative authentication and no customer is ever asked to choose or
- * invent a code. Replace `isValidManagerCode` with an API call when the backend
- * arrives — this screen only needs a boolean back.
+ * The code is issued to branch managers, never chosen by the customer, and the
+ * API validates it again when the account is created. This screen only needs a
+ * boolean back.
  */
 export default function RegisterGate() {
   useDocumentTitle('Bank Manager Code')
@@ -25,24 +25,23 @@ export default function RegisterGate() {
   const [error, setError] = useState(null)
   const [submitting, setSubmitting] = useState(false)
 
-  const submit = (event) => {
+  const submit = async (event) => {
     event.preventDefault()
     if (!String(code).trim()) {
       setError('Enter your Bank Manager Code to continue.')
       return
     }
     setSubmitting(true)
-    const accepted = isValidManagerCode(code)
-    setSubmitting(false)
-
-    if (!accepted) {
-      setError('Invalid Bank Manager Code. Please check the code and try again.')
-      return
+    try {
+      await api.verifyManagerCode(code.trim())
+      unlockManagerCode(code.trim())
+      toast.success('Bank Manager Code accepted', 'Continue to create the customer account.')
+      navigate('/register/account', { replace: true })
+    } catch (err) {
+      setError(err.message || 'Invalid Bank Manager Code. Please check the code and try again.')
+    } finally {
+      setSubmitting(false)
     }
-
-    unlockManagerCode(String(code).trim())
-    toast.success('Bank Manager Code accepted', 'Continue to create the customer account.')
-    navigate('/register/account', { replace: true })
   }
 
   return (
@@ -51,8 +50,8 @@ export default function RegisterGate() {
       subtitle="Enter your Bank Manager Code to continue."
       points={[
         'The manager code unlocks customer account creation',
-        'Demo gateway only — not real banking security',
-        'Your code is never stored on the device',
+        'Only authorised managers can create customer accounts',
+        'The code is held temporarily in this browser tab for registration',
       ]}
       footer={
         <p>
@@ -94,10 +93,10 @@ export default function RegisterGate() {
         <div className="rounded-card border border-dashed border-ink-300 bg-ink-50 p-3.5">
           <p className="flex items-center gap-2 text-[12.5px] font-semibold text-ink-800">
             <KeyRound className="size-3.5 text-brand-600" aria-hidden="true" />
-            Demo Bank Manager Code
+            Where do I find the code?
           </p>
           <p className="mt-1 text-[12.5px] leading-5 text-ink-500">
-            This code is required before a customer account can be created.
+            Your branch manager issues a single code that authorises customer account creation.
           </p>
         </div>
       </form>

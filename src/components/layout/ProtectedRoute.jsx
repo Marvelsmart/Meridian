@@ -1,6 +1,6 @@
 import { Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
-import { isManagerCodeUnlocked } from '@/config/demo'
+import { isManagerCodeUnlocked } from '@/config/signup'
 import { LoadingState } from '@/components/ui/States'
 
 /** Redirects unauthenticated visitors to sign-in, remembering the destination. */
@@ -24,10 +24,10 @@ export function PublicOnlyRoute({ children }) {
 }
 
 /**
- * Guards the signup form behind the demo Bank Manager Code gate.
+ * Guards the signup form behind the Bank Manager Code gate.
  *
  * The gate itself lives at `/register`; typing the code there unlocks the tab
- * session (see `config/demo.js`). Anyone landing on `/register/account`
+ * session (see `config/signup.js`). Anyone landing on `/register/account`
  * directly is sent back to enter the code, exactly like the intended flow:
  *
  *   Sign Up → Bank Manager Code → valid code → signup form

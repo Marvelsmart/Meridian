@@ -45,26 +45,14 @@ export default function ForgotPassword() {
     >
       {result ? (
         <div className="space-y-4">
-          <Alert tone="success" icon={CheckCircle2} title="Reset code sent">
-            We sent a reset code to {result.email}. It expires in {result.expiresInMinutes} minutes.
+          <Alert tone="success" icon={CheckCircle2} title="Check your email">
+            If an account exists for {result.email}, a one-time reset code has been sent. It expires in {result.expiresInMinutes} minutes.
           </Alert>
-
-          <div className="rounded-card border border-dashed border-ink-300 bg-ink-50 p-3.5">
-            <p className="flex items-center gap-2 text-[12.5px] font-semibold text-ink-800">
-              <Mail className="size-3.5 text-brand-600" aria-hidden="true" />
-              Demo environment
-            </p>
-            <p className="mt-1 text-[12.5px] leading-5 text-ink-500">
-              There is no email service in this build. Use this code on the next screen:
-              <span className="ml-1 font-mono text-[13px] font-semibold text-ink-900">{result.demoCode}</span>
-            </p>
-          </div>
-
           <Button
             size="lg"
             fullWidth
             iconRight={ArrowRight}
-            onClick={() => navigate(`/reset-password?email=${encodeURIComponent(result.email)}&code=${result.demoCode}`)}
+            onClick={() => navigate(`/reset-password?email=${encodeURIComponent(result.email)}`)}
           >
             Continue to reset password
           </Button>

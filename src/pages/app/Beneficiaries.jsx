@@ -195,7 +195,7 @@ export default function Beneficiaries() {
 
       <Card className="flex flex-col gap-2 bg-ink-50/60 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-[13px] leading-6 text-ink-600">
-          Beneficiaries are held in the demo mock store. In production they belong to your customer profile.
+          Beneficiaries are saved to your customer profile and are available in the transfer flow.
         </p>
         <Button variant="secondary" size="sm" onClick={() => navigate('/app/transfer')}>
           Go to transfer

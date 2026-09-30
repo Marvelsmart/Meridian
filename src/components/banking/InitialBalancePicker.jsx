@@ -3,28 +3,28 @@ import { cn } from '@/lib/cn'
 import { formatCurrency } from '@/lib/format'
 import {
   balanceToInputText,
-  DEMO_BALANCE_PRESETS,
+  BALANCE_PRESETS,
   MAX_INITIAL_BALANCE,
   MIN_INITIAL_BALANCE,
   parseBalanceInput,
-} from '@/config/demo'
+} from '@/config/signup'
 import { FieldShell } from '@/components/ui'
 
 /**
  * Opening balance selector for the signup form.
  *
  * Reports only the numeric amount through `onChange` so the selected value can
- * flow straight into the signup payload and, later, a real API call. The amount
- * is explicitly a demo figure — it never represents a real deposit.
+ * flow straight into the signup payload and become the account's opening
+ * balance.
  */
 export function InitialBalancePicker({
   value = null,
   onChange,
-  presets = DEMO_BALANCE_PRESETS,
+  presets = BALANCE_PRESETS,
   error = null,
   disabled = false,
-  label = 'Initial demo balance',
-  hint = 'This amount is for demonstration purposes only — no real money is deposited.',
+  label = 'Opening balance',
+  hint = 'This amount is credited to the account when it is created.',
   className = '',
 }) {
   const matchesPreset = value !== null && presets.includes(Number(value))
@@ -118,7 +118,7 @@ export function InitialBalancePicker({
             value={text}
             onChange={(event) => changeText(event.target.value)}
             placeholder="0.00"
-            aria-label="Custom initial demo balance"
+            aria-label="Custom opening balance"
             aria-invalid={Boolean(error)}
             className="amount h-11 min-w-0 flex-1 border-0 bg-transparent text-[15px] font-semibold text-ink-900 outline-none placeholder:font-normal placeholder:text-ink-300"
           />

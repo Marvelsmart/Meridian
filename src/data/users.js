@@ -1,6 +1,6 @@
 /**
- * Signed-in customer profile + the accounts they hold.
- * Purely mock data — replaced by an API call (`api.getProfile`) later.
+ * Seed profile for the bank's review account, plus the accounts it holds.
+ * `server/seed.js` uses this record to create the account reviewers sign in with.
  */
 export const USER = {
   id: 'usr_01',
@@ -15,7 +15,7 @@ export const USER = {
   /**
    * Customer-facing identity verification state. One of:
    * verified · pending · under_review · action_required
-   * (`config/verification.js` holds the labels; nothing real is checked.)
+   * (`config/verification.js` holds the matching labels.)
    */
   verificationStatus: 'verified',
   address: {

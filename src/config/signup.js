@@ -1,35 +1,20 @@
 import { readSessionStorage, writeSessionStorage, removeSessionStorage } from '@/lib/storage'
 
 /**
- * Front-end demo configuration.
+ * Signup configuration.
  *
- * Everything here exists so the demo can behave realistically without a
- * backend. Nothing in this file is real security or real money: when the API
- * arrives, delete these values and read them from the server instead.
+ * The values here shape the customer signup flow: opening-balance presets and
+ * parsing helpers. The manager code itself is validated only by the API.
  */
-
-/**
- * Fictional Bank Manager Code that unlocks the signup form.
- *
- * This is a front-end/demo gateway only — it is NOT authentication and it must
- * never be treated as banking security. The code is fixed (the customer cannot
- * invent their own) so the demo flow is always predictable.
- */
-export const DEMO_MANAGER_CODE = 'BANKMANAGER2026'
 
 /** sessionStorage key — the gate unlocks for the current browser tab only. */
 export const MANAGER_CODE_STORAGE_KEY = 'northstarbank.gate.manager-code'
 
-/** Preset opening balances offered on the signup form (USD, demo money). */
-export const DEMO_BALANCE_PRESETS = [500, 1000, 2500, 5000, 10000]
+/** Preset opening balances offered on the signup form (USD). */
+export const BALANCE_PRESETS = [500, 1000, 2500, 5000, 10000]
 
 export const MIN_INITIAL_BALANCE = 100
 export const MAX_INITIAL_BALANCE = 1000000
-
-/** Case-insensitive comparison so typing "bankmanager2026" still works. */
-export function isValidManagerCode(value) {
-  return String(value ?? '').trim().toUpperCase() === DEMO_MANAGER_CODE
-}
 
 /** '7,500' · '$7500' · '7500.50' → 7500.5 · '' → null */
 export function parseBalanceInput(value) {
@@ -60,13 +45,13 @@ export function initialBalanceError(value) {
 }
 
 /* ------------------------------------------------------------------ */
-/* Bank Manager Code gate (demo only)                                  */
+/* Bank Manager Code gate                                              */
 /* ------------------------------------------------------------------ */
 
 /**
  * The gate lives for the current tab session (sessionStorage), so closing the
- * tab asks for the code again. Swap these three helpers for real API
- * verification later — the UI only cares about the boolean.
+ * tab asks for the code again. Swap these three helpers for an API call later —
+ * the UI only cares about the boolean.
  */
 export function isManagerCodeUnlocked() {
   return Boolean(readSessionStorage(MANAGER_CODE_STORAGE_KEY, null))
@@ -84,5 +69,3 @@ export function managerCodeForRegistration() {
   const value = readSessionStorage(MANAGER_CODE_STORAGE_KEY, null)
   return typeof value === 'string' ? value : null
 }
-
-

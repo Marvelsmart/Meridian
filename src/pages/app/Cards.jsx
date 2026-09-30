@@ -37,7 +37,7 @@ export default function Cards() {
   const handleToggleFreeze = async (card) => {
     try {
       await actions.toggleFreeze(card.id)
-      toast.success(card.status === 'frozen' ? 'Card unfrozen' : 'Card frozen', 'Your card status was updated.')
+      toast.success('Card status request submitted', 'Customer care will review the request.')
     } catch (error) {
       toast.error('We could not update your card', error.message)
     }
@@ -93,6 +93,9 @@ export default function Cards() {
                     {card.isDefault ? <Badge variant="brand">Default</Badge> : null}
                   </div>
                   <p className="mt-1 text-[12.5px] text-ink-500">{card.brand} · {card.type}</p>
+                  {card.status === 'freeze_pending' || card.status === 'unfreeze_pending' ? (
+                    <p className="mt-1 text-[12px] font-medium text-warning-700">{card.status === 'freeze_pending' ? 'Freeze request pending approval' : 'Unfreeze request pending approval'}</p>
+                  ) : null}
                 </div>
                 <div className="flex items-center gap-2">
                   <Button
@@ -100,8 +103,9 @@ export default function Cards() {
                     size="sm"
                     icon={card.status === 'frozen' ? Unlock : Lock}
                     onClick={() => handleToggleFreeze(card)}
+                    disabled={!['active', 'frozen'].includes(card.status)}
                   >
-                    {card.status === 'frozen' ? 'Unfreeze' : 'Freeze'}
+                    {card.status === 'freeze_pending' || card.status === 'unfreeze_pending' ? 'Awaiting approval' : card.status === 'frozen' ? 'Request unfreeze' : 'Request freeze'}
                   </Button>
                 </div>
               </div>

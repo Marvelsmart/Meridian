@@ -1,6 +1,6 @@
 import { CreditCard, FileText, LifeBuoy, MessageCircle, ShieldCheck, Wallet } from 'lucide-react'
 import { useDocumentTitle } from '@/hooks/useLocalStorage'
-import { isWhatsAppSupportConfigured } from '@/config/support'
+import { ZANGI_SUPPORT_NUMBER } from '@/config/support'
 import { SectionCard } from '@/components/ui'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { SupportCard } from '@/components/banking'
@@ -20,14 +20,14 @@ export default function Support() {
     <div className="space-y-5">
       <PageHeader
         title="Customer Support"
-        description="We're here to help. Start a chat, call us, or email the team and we will pick it up."
+          description="Open the in-app customer-care panel for account assistance."
         actions={<SupportCard variant="compact" />}
       />
 
       <div className="grid gap-4 lg:grid-cols-[1fr_1.1fr]">
         <SupportCard
           title="Need help?"
-          description="Chat with our support team on WhatsApp. We usually reply within a few minutes during business hours."
+          description="Start a conversation from the customer-care panel without leaving your account."
         />
 
         <SectionCard title="Other ways we can help" description="Pick the topic that matches your question">
@@ -48,20 +48,17 @@ export default function Support() {
         </SectionCard>
       </div>
 
-      <SectionCard title="About live chat in this demo" description="What is and is not connected yet">
+      <SectionCard title="Customer care" description="Support contact and messaging status">
         <ul className="space-y-2 text-[13px] leading-6 text-ink-600">
           <li className="flex gap-2">
             <MessageCircle className="mt-1 size-3.5 shrink-0 text-ink-400" aria-hidden="true" />
             <span>
-              “Chat with Support” opens WhatsApp with your message pre-filled
-              {isWhatsAppSupportConfigured()
-                ? '.'
-                : ' as soon as the support number is configured — it is intentionally left unset in this build.'}
+              Zangi customer-care number: <strong>{ZANGI_SUPPORT_NUMBER}</strong>.
             </span>
           </li>
           <li className="flex gap-2">
             <LifeBuoy className="mt-1 size-3.5 shrink-0 text-ink-400" aria-hidden="true" />
-            <span>There is no real-time chat agent, ticket queue or chat history in this demo — no chat backend is connected.</span>
+            <span>The in-app chat panel is ready, but live message delivery still needs the Zangi messaging service/API credentials.</span>
           </li>
         </ul>
       </SectionCard>

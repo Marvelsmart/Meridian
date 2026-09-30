@@ -1,4 +1,4 @@
-/** Simulated card portfolio — invented PANs, no real card data anywhere. */
+/** Card catalogue — sample PANs only; the app must never store real card numbers. */
 export const CARDS = [
   {
     id: 'card_01',

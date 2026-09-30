@@ -1,0 +1,173 @@
+import { Router } from 'express'
+import bcrypt from 'bcryptjs'
+import crypto from 'node:crypto'
+import { z } from 'zod'
+import { Account, AccountResetToken, AdminAuditLog, Card, Notification, User } from '../models/index.js'
+import { requireAdmin, requireAuth } from '../middleware/auth.js'
+import { env } from '../config/env.js'
+import { sendResetCode } from '../security/account-reset.js'
+
+const router = Router()
+router.use(requireAuth, requireAdmin)
+
+const verificationStatus = z.enum(['verified', 'pending', 'under_review', 'action_required'])
+const ordinaryCustomerFilter = { role: 'customer', email: { $nin: env.adminEmails } }
+const customerPatch = z.object({
+  firstName: z.string().trim().min(2).max(80).optional(),
+  lastName: z.string().trim().min(2).max(80).optional(),
+  email: z.string().email().transform((email) => email.toLowerCase()).optional(),
+  phone: z.string().trim().min(7).max(24).optional(),
+  address: z.record(z.string(), z.unknown()).optional(),
+  verificationStatus: verificationStatus.optional(),
+}).strict()
+const createCustomerSchema = z.object({
+  firstName: z.string().trim().min(2).max(80),
+  lastName: z.string().trim().min(2).max(80),
+  email: z.string().email().transform((email) => email.toLowerCase()),
+  phone: z.string().trim().min(7).max(24),
+  address: z.string().trim().max(160).optional().default(''),
+}).strict()
+
+const recordAdminAction = (req, action, targetType, targetId, details = {}) => AdminAuditLog.create({
+  actor: req.user._id,
+  action,
+  targetType,
+  targetId: String(targetId),
+  details,
+})
+
+function safeCustomer(user) {
+  const { passwordHash, transactionPinHash, ...safe } = user
+  return { ...safe, hasTransactionPin: Boolean(transactionPinHash) }
+}
+
+router.get('/customers', async (req, res) => {
+  const users = await User.find(ordinaryCustomerFilter)
+    .select('firstName lastName email phone address verificationStatus transactionPinResetRequired passwordResetRequired createdAt +transactionPinHash')
+    .sort({ createdAt: -1 })
+    .limit(250)
+    .lean()
+  res.json({ customers: users.map(safeCustomer) })
+})
+
+router.post('/customers', async (req, res) => {
+  const input = createCustomerSchema.parse(req.body)
+  if (env.adminEmails.includes(input.email)) return res.status(400).json({ error: 'Administrator emails cannot be created as customer accounts.' })
+  const temporaryPassword = crypto.randomBytes(32).toString('hex')
+  let user
+  let account
+  try {
+    user = await User.create({
+      firstName: input.firstName,
+      lastName: input.lastName,
+      email: input.email,
+      phone: input.phone,
+      passwordHash: await bcrypt.hash(temporaryPassword, 12),
+      passwordResetRequired: true,
+      transactionPinResetRequired: true,
+      address: input.address ? { street: input.address } : undefined,
+      verificationStatus: 'pending',
+    })
+    account = await Account.create({
+      owner: user._id,
+      name: 'Everyday Checking',
+      type: 'checking',
+      number: `0${crypto.randomInt(100000000, 999999999)}`,
+      balance: 0,
+      ledgerBalance: 0,
+      available: 0,
+      primary: true,
+      bank: 'Northstar Bank',
+      openedOn: new Date(),
+      currency: 'USD',
+      limits: { dailyTransfer: 20000, singleTransfer: 10000 },
+    })
+    await sendResetCode(user, 'password')
+    await sendResetCode(user, 'transaction_pin')
+  } catch (error) {
+    if (user) {
+      await Promise.all([
+        AccountResetToken.deleteMany({ owner: user._id }),
+        Account.deleteMany({ owner: user._id }),
+        User.deleteOne({ _id: user._id }),
+      ])
+    }
+    throw error
+  }
+  await recordAdminAction(req, 'customer.created', 'customer', user._id, { email: user.email })
+  res.status(201).json({ customer: safeCustomer({ ...user.toObject(), transactionPinHash: undefined }), account: { id: account.id, balance: account.balance } })
+})
+
+router.patch('/customers/:id', async (req, res) => {
+  const patch = customerPatch.parse(req.body)
+  if (patch.email && env.adminEmails.includes(patch.email)) return res.status(400).json({ error: 'Customer email cannot be assigned an administrator address.' })
+  const user = await User.findOneAndUpdate({ _id: req.params.id, ...ordinaryCustomerFilter }, { $set: patch }, { new: true, runValidators: true })
+    .select('+transactionPinHash')
+    .lean()
+  if (!user) return res.status(404).json({ error: 'Customer not found.' })
+  await recordAdminAction(req, 'customer.updated', 'customer', user._id, { fields: Object.keys(patch) })
+  res.json({ customer: safeCustomer(user) })
+})
+
+router.post('/customers/:id/reset-pin', async (req, res) => {
+  const user = await User.findOne({ _id: req.params.id, ...ordinaryCustomerFilter }).select('+transactionPinHash')
+  if (!user) return res.status(404).json({ error: 'Customer not found.' })
+  const previousPinHash = user.transactionPinHash
+  user.transactionPinHash = undefined
+  user.transactionPinResetRequired = true
+  await user.save()
+  try {
+    await sendResetCode(user, 'transaction_pin')
+  } catch (error) {
+    user.transactionPinHash = previousPinHash
+    user.transactionPinResetRequired = false
+    await user.save()
+    throw error
+  }
+  await recordAdminAction(req, 'customer.pin_reset_flagged', 'customer', user._id)
+  await Notification.create({ owner: user._id, category: 'security', title: 'Transaction PIN reset required', body: 'A one-time PIN reset link was sent to your email address.', read: false, important: true })
+  res.json({ success: true })
+})
+
+router.post('/customers/:id/reset-password', async (req, res) => {
+  const user = await User.findOne({ _id: req.params.id, ...ordinaryCustomerFilter })
+  if (!user) return res.status(404).json({ error: 'Customer not found.' })
+  user.passwordResetRequired = true
+  user.authVersion = Number(user.authVersion || 0) + 1
+  await user.save()
+  try {
+    await sendResetCode(user, 'password')
+  } catch (error) {
+    user.passwordResetRequired = false
+    user.authVersion = Math.max(0, Number(user.authVersion || 0) - 1)
+    await user.save()
+    throw error
+  }
+  await recordAdminAction(req, 'customer.password_reset_flagged', 'customer', user._id)
+  await Notification.create({ owner: user._id, category: 'security', title: 'Password reset required', body: 'A one-time password reset link was sent to your email address.', read: false, important: true })
+  res.json({ success: true })
+})
+
+router.get('/card-requests', async (req, res) => {
+  const cards = await Card.find({ status: { $in: ['freeze_pending', 'unfreeze_pending'] } })
+    .populate('owner', 'firstName lastName email')
+    .sort({ freezeRequestedAt: 1 })
+    .lean()
+  res.json({ cards: cards.map(({ panCiphertext, cvvCiphertext, ...card }) => card) })
+})
+
+router.post('/card-requests/:id/review', async (req, res) => {
+  const decision = z.object({ decision: z.enum(['approve', 'reject']) }).parse(req.body).decision
+  const card = await Card.findById(req.params.id)
+  if (!card || !['freeze_pending', 'unfreeze_pending'].includes(card.status)) return res.status(404).json({ error: 'Pending card request not found.' })
+  const wasFreeze = card.status === 'freeze_pending'
+  card.status = decision === 'approve' ? (wasFreeze ? 'frozen' : 'active') : (wasFreeze ? 'active' : 'frozen')
+  card.freezeRequestedAt = undefined
+  await card.save()
+  const outcome = decision === 'approve' ? 'approved' : 'declined'
+  await recordAdminAction(req, `card.${wasFreeze ? 'freeze' : 'unfreeze'}_${outcome}`, 'card', card._id, { status: card.status })
+  await Notification.create({ owner: card.owner, category: 'card', title: `Card ${wasFreeze ? 'freeze' : 'unfreeze'} request ${decision === 'approve' ? 'approved' : 'declined'}`, body: `${card.nickname || 'Your card'} status is now ${card.status}.`, read: false, important: true })
+  res.json({ card })
+})
+
+export { router as adminRouter }

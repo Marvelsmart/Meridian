@@ -29,7 +29,7 @@ export function AuthLayout({ title, subtitle, children, footer = null, points = 
         </div>
 
         <p className="text-[12px] text-ink-500">
-          Demo environment · mock data only · not a real financial institution
+          Northstar Bank · Secure digital banking
         </p>
       </div>
 

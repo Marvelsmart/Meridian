@@ -1,8 +1,10 @@
 import { Link, Outlet } from 'react-router-dom'
-import { ArrowRight, ShieldCheck, Sparkles, Wallet } from 'lucide-react'
+import { ArrowRight, ShieldCheck, Wallet } from 'lucide-react'
 import { BRAND } from '@/lib/constants'
 import { Button } from '@/components/ui'
 import { SupportCard } from '@/components/banking'
+import { CustomerCareChat } from '@/components/banking/CustomerCareChat'
+import { ZANGI_SUPPORT_NUMBER } from '@/config/support'
 import { useAuth } from '@/context/AuthContext'
 import { Logo } from './Logo'
 
@@ -75,6 +77,7 @@ export function PublicLayout() {
       <main>
         <Outlet />
       </main>
+      <CustomerCareChat />
 
       <footer id="support" className="border-t border-ink-200 bg-ink-50">
         <div className="mx-auto grid max-w-6xl gap-8 px-4 py-12 sm:px-6 lg:grid-cols-4">
@@ -104,10 +107,11 @@ export function PublicLayout() {
             <h3 className="text-[13px] font-semibold text-ink-900">Support</h3>
             <ul className="mt-3 space-y-2.5 text-[13px] text-ink-500">
               <li>{BRAND.supportPhone}</li>
+              <li>Zangi: {ZANGI_SUPPORT_NUMBER}</li>
               <li>{BRAND.supportEmail}</li>
               <li>{BRAND.address}</li>
             </ul>
-            <SupportCard variant="compact" title="Need help?" description="Chat with Support on WhatsApp." className="mt-4" />
+            <SupportCard variant="compact" title="Need help?" description="Open the customer-care chat." className="mt-4" />
             <ul className="mt-5 space-y-2 text-[12.5px] text-ink-400">
               <li className="flex items-center gap-2">
                 <ShieldCheck className="size-3.5" aria-hidden="true" />
@@ -117,17 +121,13 @@ export function PublicLayout() {
                 <Wallet className="size-3.5" aria-hidden="true" />
                 Secure digital banking
               </li>
-              <li className="flex items-center gap-2">
-                <Sparkles className="size-3.5" aria-hidden="true" />
-                Frontend demo — mock data only
-              </li>
             </ul>
           </div>
         </div>
         <div className="border-t border-ink-200">
           <div className="mx-auto flex max-w-6xl flex-col gap-2 px-4 py-5 text-[12px] text-ink-400 sm:flex-row sm:items-center sm:justify-between sm:px-6">
             <p>© {new Date().getFullYear()} {BRAND.name} Financial Services. All rights reserved.</p>
-            <p>Demo build for product review — no real money moves.</p>
+            <p>{BRAND.name}, Member FDIC. All products subject to approval.</p>
           </div>
         </div>
       </footer>

@@ -4,7 +4,7 @@ import { AlertCircle, Info } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import { useToast } from '@/context/ToastContext'
 import { useDocumentTitle } from '@/hooks/useLocalStorage'
-import { initialBalanceError, lockManagerCode } from '@/config/demo'
+import { initialBalanceError, lockManagerCode } from '@/config/signup'
 import { formatCurrency } from '@/lib/format'
 import { DEFAULT_COUNTRY, formatUsPhone, phoneError, toE164 } from '@/lib/phone'
 import { Alert, Button, Checkbox, FieldShell, Input, Progress } from '@/components/ui'
@@ -36,6 +36,8 @@ export default function Register() {
     email: '',
     phone: '',
     password: '',
+    transactionPin: '',
+    confirmTransactionPin: '',
   })
   const [initialBalance, setInitialBalance] = useState(null)
   const [balanceError, setBalanceError] = useState(null)
@@ -48,6 +50,12 @@ export default function Register() {
 
   const update = (field) => (event) => {
     setValues((current) => ({ ...current, [field]: event.target.value }))
+    setErrors((current) => ({ ...current, [field]: undefined }))
+    setFormError(null)
+  }
+
+  const updateDigits = (field) => (event) => {
+    setValues((current) => ({ ...current, [field]: event.target.value.replace(/\D/g, '').slice(0, 4) }))
     setErrors((current) => ({ ...current, [field]: undefined }))
     setFormError(null)
   }
@@ -77,6 +85,15 @@ export default function Register() {
       return
     }
 
+    if (!/^\d{4}$/.test(values.transactionPin) || values.transactionPin !== values.confirmTransactionPin) {
+      setErrors({
+        transactionPin: /^\d{4}$/.test(values.transactionPin) ? undefined : 'Enter a 4-digit transaction PIN.',
+        confirmTransactionPin: values.transactionPin === values.confirmTransactionPin ? undefined : 'PINs do not match.',
+      })
+      setFormError('Enter and confirm your 4-digit transaction PIN.')
+      return
+    }
+
     if (!accepted) {
       setFormError('Please accept the terms and privacy policy to continue.')
       return
@@ -89,7 +106,7 @@ export default function Register() {
     try {
       // The phone number is normalised to E.164 (a U.S. backend would store
       // exactly this) and the chosen opening balance rides along with the
-      // payload so it becomes the customer's demo account balance.
+      // payload so it becomes the customer's opening account balance.
       await signUp({
         ...values,
         phone: toE164(values.phone) ?? values.phone,
@@ -98,7 +115,7 @@ export default function Register() {
       lockManagerCode()
       toast.success(
         'Account created',
-        `Your Northstar account is ready with an opening demo balance of ${formatCurrency(initialBalance)}.`,
+        `Your Northstar account is ready with an opening balance of ${formatCurrency(initialBalance)}.`,
       )
       navigate('/app/dashboard', { replace: true })
     } catch (error) {
@@ -112,11 +129,11 @@ export default function Register() {
   return (
     <AuthLayout
       title="Open your Northstar account"
-      subtitle="It takes about two minutes. Choose the demo balance you want to start with — your Everyday account comes with a $25,000 daily transfer limit."
+      subtitle="It takes about two minutes. Choose the opening balance you want to start with — your Everyday account comes with a $25,000 daily transfer limit."
       points={[
         'Checking, savings and travel accounts in one login',
         'Virtual cards created instantly',
-        'You choose the opening balance for this demo',
+        'You choose the opening balance',
       ]}
       footer={
         <p>
@@ -232,6 +249,32 @@ export default function Register() {
           </div>
         </div>
 
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Input
+            label="Transaction PIN"
+            type="password"
+            inputMode="numeric"
+            autoComplete="new-password"
+            maxLength={4}
+            value={values.transactionPin}
+            onChange={updateDigits('transactionPin')}
+            error={errors.transactionPin}
+            hint="Choose a 4-digit PIN for authorizing transfers."
+            required
+          />
+          <Input
+            label="Confirm transaction PIN"
+            type="password"
+            inputMode="numeric"
+            autoComplete="new-password"
+            maxLength={4}
+            value={values.confirmTransactionPin}
+            onChange={updateDigits('confirmTransactionPin')}
+            error={errors.confirmTransactionPin}
+            required
+          />
+        </div>
+
         <Checkbox
           checked={accepted}
           onChange={(checked) => {
@@ -239,7 +282,7 @@ export default function Register() {
             setFormError(null)
           }}
           label="I agree to the terms of service and privacy policy"
-          description="Northstar may verify my identity using the details provided. Identity verification is simulated in this demo."
+          description="Northstar may verify my identity using the details provided."
         />
 
         <Button type="submit" size="lg" fullWidth loading={submitting}>

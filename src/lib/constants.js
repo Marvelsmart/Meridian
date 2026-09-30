@@ -7,7 +7,7 @@ export const STORAGE_KEYS = {
 export const BRAND = {
   name: 'Northstar Bank',
   tagline: 'Banking designed around your life.',
-  supportEmail: 'support@northstarbank-demo.com',
+  supportEmail: 'support@northstarbank.com',
   supportPhone: '+1 (800) 555-0136',
   address: '2400 Harbor Avenue, Seattle, WA',
 }

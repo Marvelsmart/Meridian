@@ -172,34 +172,11 @@ export function AppDataProvider({ children }) {
         setState((prev) => ({ ...prev, notifications: prev.notifications.filter((item) => item.id !== id) }))
       }),
 
-      saveProfile: wrapped(async (patch) => {
-        const user = await api.updateProfile(patch)
-        setState((prev) => ({ ...prev, user }))
-        return user
-      }),
       saveSecurity: wrapped(async (patch) => {
         const security = await api.updateSecuritySettings(patch)
         setState((prev) => ({ ...prev, user: { ...prev.user, security } }))
         await syncNotifications()
         return security
-      }),
-      changePassword: wrapped(async (payload) => {
-        const result = await api.changePassword(payload)
-        await syncNotifications()
-        return result
-      }),
-      setTransactionPin: wrapped(async (payload) => api.setTransactionPin(payload)),
-      revokeSession: wrapped(async (id) => {
-        const sessions = await api.revokeSession(id)
-        setState((prev) => ({ ...prev, sessions }))
-        await syncNotifications()
-        return sessions
-      }),
-      revokeOtherSessions: wrapped(async () => {
-        const sessions = await api.revokeOtherSessions()
-        setState((prev) => ({ ...prev, sessions }))
-        await syncNotifications()
-        return sessions
       }),
     }
   }, [applyMovement, bump, load, syncNotifications])

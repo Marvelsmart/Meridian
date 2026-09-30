@@ -1,6 +1,6 @@
 # Backend Mapping
 
-The existing UI uses `src/lib/api.js` as its single mock boundary. The migration keeps that boundary as the frontend adapter and replaces its local-storage implementation with REST calls in a follow-up integration pass.
+The UI uses `src/lib/api.js` as its single data boundary. That boundary is the frontend adapter over the REST API in `server/`: pages and contexts never call `fetch` directly, so the transport can change without touching the views.
 
 | Existing frontend data | MongoDB model | API | Current consumer | Scope |
 | --- | --- | --- | --- | --- |

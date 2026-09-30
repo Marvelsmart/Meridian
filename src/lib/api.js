@@ -2,7 +2,7 @@ import { filterTransactions, inRange, statementTotals, sumsFor } from './analyti
 import { readStorage, removeStorage, writeStorage } from './storage'
 import { STORAGE_KEYS } from './constants'
 import { toInputDate } from './format'
-import { managerCodeForRegistration } from '@/config/demo'
+import { managerCodeForRegistration } from '@/config/signup'
 
 export const LATENCY = { fast: 0, normal: 0, slow: 0 }
 const API_BASE_URL = import.meta.env.VITE_API_URL || '/api'
@@ -89,6 +89,10 @@ export async function login(credentials) {
   return requestBackend('/auth/login', post(credentials))
 }
 
+export async function verifyManagerCode(code) {
+  return requestBackend('/auth/manager-code/verify', post({ code }))
+}
+
 export async function register(payload) {
   const managerCode = managerCodeForRegistration()
   if (!managerCode) throw new ApiError('Complete the Bank Manager Code step before creating an account.', { code: 'manager_code_required' })
@@ -97,6 +101,7 @@ export async function register(payload) {
 
 export async function requestPasswordReset(email) { return requestBackend('/auth/password-reset/request', post({ email })) }
 export async function resetPassword(payload) { return requestBackend('/auth/password-reset/confirm', post(payload)) }
+export async function resetTransactionPin(payload) { return requestBackend('/auth/transaction-pin/reset/confirm', post(payload)) }
 
 export async function logout() {
   try { await requestBackend('/auth/logout', post({})) } finally { persistSession(null) }
@@ -106,7 +111,7 @@ export async function logout() {
 export function currentSession() { return readStorage(STORAGE_KEYS.auth, null) }
 export function persistSession(session) { session ? writeStorage(STORAGE_KEYS.auth, session) : removeStorage(STORAGE_KEYS.auth) }
 export async function validateSession() { return requestBackend('/auth/me') }
-export function resetDemoData() { removeStorage(STORAGE_KEYS.auth); removeStorage(STORAGE_KEYS.prefs); return true }
+export function resetLocalData() { removeStorage(STORAGE_KEYS.auth); removeStorage(STORAGE_KEYS.prefs); return true }
 export const apiBaseUrl = API_BASE_URL
 
 export async function getAppData() { return normalizeAppData(await requestBackend('/app-data')) }
@@ -171,11 +176,13 @@ export async function requestNewCard(payload) { return requestBackend('/cards', 
 export async function setNotificationRead(id, read = true) { return requestBackend(`/notifications/${id}`, { method: 'PATCH', body: JSON.stringify({ read }) }) }
 export async function markAllNotificationsRead() { return requestBackend('/notifications/read-all', post({})) }
 export async function deleteNotification(id) { return requestBackend(`/notifications/${id}`, { method: 'DELETE' }) }
-export async function updateProfile(patch) { return requestBackend('/profile', { method: 'PATCH', body: JSON.stringify(patch) }) }
-export async function changePassword(payload) { return requestBackend('/auth/password', post(payload)) }
-export async function setTransactionPin(payload) { return requestBackend('/auth/transaction-pin', post(payload)) }
 export async function updateSecuritySettings(patch) { return requestBackend('/security', { method: 'PATCH', body: JSON.stringify(patch) }) }
-export async function revokeSession(id) { return requestBackend(`/devices/${id}`, { method: 'DELETE' }) }
-export async function revokeOtherSessions() { return requestBackend('/devices/others', { method: 'DELETE' }) }
 export async function validateCurrentDevice(pin) { return requestBackend(`/devices/${encodeURIComponent(getDeviceId())}/validate`, post({ pin })) }
 export async function exportStatement({ accountId, from, to }) { return fetchStatement({ accountId, from, to }) }
+export async function adminListCustomers() { return requestBackend('/admin/customers') }
+export async function adminCreateCustomer(payload) { return requestBackend('/admin/customers', post(payload)) }
+export async function adminUpdateCustomer(id, patch) { return requestBackend(`/admin/customers/${encodeURIComponent(id)}`, { method: 'PATCH', body: JSON.stringify(patch) }) }
+export async function adminResetCustomerPin(id) { return requestBackend(`/admin/customers/${encodeURIComponent(id)}/reset-pin`, post({})) }
+export async function adminResetCustomerPassword(id) { return requestBackend(`/admin/customers/${encodeURIComponent(id)}/reset-password`, post({})) }
+export async function adminListCardRequests() { return requestBackend('/admin/card-requests') }
+export async function adminReviewCardRequest(id, decision) { return requestBackend(`/admin/card-requests/${encodeURIComponent(id)}/review`, post({ decision })) }

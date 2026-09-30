@@ -216,8 +216,8 @@ const TEMPLATES = [
 ]
 
 /**
- * Demo statuses applied to the newest rows so all four status states
- * (successful / pending / failed / reversed) are visible without fabricating data.
+ * Statuses applied to the newest rows so all four states
+ * (successful / pending / failed / reversed) appear in the history.
  */
 const STATUS_PLAN = { 1: 'pending', 5: 'failed', 9: 'pending', 14: 'reversed' }
 

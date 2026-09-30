@@ -7,9 +7,7 @@ import { Button } from '@/components/ui'
  * Customer support entry point shown in the sidebar, the mobile "More" drawer,
  * the marketing footer and the support page.
  *
- * The button deep-links into WhatsApp as soon as a real number is set in
- * `config/support.js`. Until then it explains that live chat is not connected
- * yet — no placeholder number is ever invented or dialled.
+ * The support button opens the shared in-app customer-care panel.
  */
 export function SupportCard({
   variant = 'default',

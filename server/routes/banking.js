@@ -72,7 +72,7 @@ async function movement(req, res, next, category, direction) {
     if (category === 'transfer') {
       recipientDetails = recipientDetailsSchema.parse(req.body.recipientDetails)
       const user = await User.findById(req.user._id).select('+transactionPinHash')
-      if (!user?.transactionPinHash) return res.status(403).json({ code: 'transaction_pin_not_set', error: 'Set a transaction PIN in Security before sending a transfer.' })
+      if (!user?.transactionPinHash) return res.status(403).json({ code: 'transaction_pin_not_set', error: 'Contact customer care to set or reset your transaction PIN.' })
       if (!/^\d{4}$/.test(String(req.body.pin || '')) || !(await bcrypt.compare(String(req.body.pin), user.transactionPinHash))) {
         return res.status(422).json({ code: 'invalid_transaction_pin', error: 'The transaction PIN is incorrect.' })
       }
@@ -89,8 +89,21 @@ router.post('/bill-payments', requireValidatedDevice, (req, res, next) => moveme
 router.post('/add-funds', requireValidatedDevice, (req, res, next) => movement(req, res, next, 'income', 'credit'))
 router.post('/withdrawals', requireValidatedDevice, (req, res, next) => movement(req, res, next, 'withdrawal', 'debit'))
 
-router.patch('/cards/:id/freeze', requireValidatedDevice, async (req, res) => { const card = await Card.findOne({ _id: req.params.id, owner: req.user._id }); if (!card) return res.status(404).json({ error: 'Card not found' }); card.status = card.status === 'frozen' ? 'active' : 'frozen'; await card.save(); res.json(safeCard(card)) })
-router.patch('/cards/:id', async (req, res) => { const card = await Card.findOneAndUpdate({ _id: req.params.id, owner: req.user._id }, { $set: req.body }, { new: true }); if (!card) return res.status(404).json({ error: 'Card not found' }); res.json(safeCard(card)) })
+router.patch('/cards/:id/freeze', requireValidatedDevice, async (req, res) => {
+  const card = await Card.findOne({ _id: req.params.id, owner: req.user._id })
+  if (!card) return res.status(404).json({ error: 'Card not found' })
+  if (!['active', 'frozen'].includes(card.status)) return res.status(409).json({ error: 'A card status request is already pending.' })
+  card.status = card.status === 'frozen' ? 'unfreeze_pending' : 'freeze_pending'
+  card.freezeRequestedAt = new Date()
+  await card.save()
+  res.json(safeCard(card))
+})
+router.patch('/cards/:id', async (req, res) => {
+  const patch = z.object({ nickname: z.string().trim().min(1).max(40).optional(), contactless: z.boolean().optional(), limits: z.record(z.string(), z.unknown()).optional() }).strict().parse(req.body)
+  const card = await Card.findOneAndUpdate({ _id: req.params.id, owner: req.user._id }, { $set: patch }, { new: true })
+  if (!card) return res.status(404).json({ error: 'Card not found' })
+  res.json(safeCard(card))
+})
 router.post('/cards', async (req, res) => { const account = await Account.findOne({ owner: req.user._id, primary: true }); if (!account) return res.status(404).json({ error: 'Account not found' }); const last4 = String(Math.floor(1000 + Math.random() * 9000)); const card = await Card.create({ owner: req.user._id, account: account._id, nickname: req.body.nickname || 'Online card', holderName: `${req.user.firstName} ${req.user.lastName}`.toUpperCase(), last4, expiry: '12/30', brand: 'Visa', type: req.body.type === 'virtual' ? 'Virtual' : 'Physical', currency: req.body.currency || 'USD', status: req.body.type === 'virtual' ? 'active' : 'processing', contactless: req.body.type !== 'virtual', limits: {} }); res.status(201).json(safeCard(card)) })
 
 router.get('/cards', async (req, res) => res.json((await Card.find({ owner: req.user._id }).lean()).map(safeCard)))
@@ -99,7 +112,7 @@ router.get('/devices', async (req, res) => res.json(await Device.find({ owner: r
 router.post('/devices/:deviceId/validate', async (req, res) => {
   if (req.params.deviceId !== req.deviceId) return res.status(403).json({ error: 'Only the current device can be validated.' })
   const user = await User.findById(req.user._id).select('+transactionPinHash')
-  if (!user?.transactionPinHash) return res.status(403).json({ code: 'transaction_pin_not_set', error: 'Set a transaction PIN in Security before sending a transfer.' })
+  if (!user?.transactionPinHash) return res.status(403).json({ code: 'transaction_pin_not_set', error: 'Contact customer care to set or reset your transaction PIN.' })
   if (!(await bcrypt.compare(String(req.body.pin || ''), user.transactionPinHash))) {
     return res.status(422).json({ code: 'invalid_transaction_pin', error: 'The transaction PIN is incorrect.' })
   }
@@ -113,7 +126,7 @@ router.delete('/devices/:id', async (req, res) => { await Device.deleteOne({ _id
 router.patch('/notifications/:id', async (req, res) => { const item = await Notification.findOneAndUpdate({ _id: req.params.id, owner: req.user._id }, { $set: { read: Boolean(req.body.read) } }, { new: true }); if (!item) return res.status(404).json({ error: 'Notification not found' }); res.json(item) })
 router.post('/notifications/read-all', async (req, res) => { await Notification.updateMany({ owner: req.user._id }, { $set: { read: true } }); res.json(await Notification.find({ owner: req.user._id }).sort({ createdAt: -1 }).lean()) })
 router.delete('/notifications/:id', async (req, res) => { await Notification.deleteOne({ _id: req.params.id, owner: req.user._id }); res.json({ id: req.params.id }) })
-router.patch('/profile', async (req, res) => { const user = await User.findByIdAndUpdate(req.user._id, { $set: req.body }, { new: true }); res.json(publicUser(user)) })
+router.patch('/profile', async (req, res) => res.status(403).json({ error: 'Profile changes must be handled by customer care.' }))
 router.patch('/security', async (req, res) => { const user = await User.findByIdAndUpdate(req.user._id, { $set: { security: req.body } }, { new: true }); res.json(user.security) })
 router.get('/statements', async (req, res) => {
   const filter = { $or: [{ visibility: 'shared' }, { owner: req.user._id, visibility: 'private' }] }

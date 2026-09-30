@@ -1,4 +1,4 @@
-/** Mobile top-up catalogue using a fictional U.S. carrier set. */
+/** Mobile top-up catalogue for U.S. carriers. */
 export const AIRTIME_PRESETS = [25, 50, 75, 100, 150, 250, 500, 1000]
 export const AIRTIME_MIN = 10
 export const AIRTIME_MAX = 2500

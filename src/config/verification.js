@@ -2,9 +2,8 @@
  * Identity verification states (customer-facing naming).
  *
  * U.S. banks ask new customers for identifying information before opening an
- * account, so this feature is appropriate — but in this demo it is purely a
- * simulated front-end state. There is no SSN check, no document upload to a
- * real provider and no government or credit-bureau lookup.
+ * account, so the wording here follows states a customer would recognise. The
+ * customer's verification status is recorded on their profile.
  */
 export const VERIFICATION_META = {
   verified: {

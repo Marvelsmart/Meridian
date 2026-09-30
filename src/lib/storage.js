@@ -27,7 +27,7 @@ export function removeStorage(key) {
 }
 
 /**
- * sessionStorage variants — used for per-tab state such as the demo signup
+ * sessionStorage variants — used for per-tab state such as the signup
  * gate, which should not survive the tab being closed.
  */
 export function readSessionStorage(key, fallback = null) {

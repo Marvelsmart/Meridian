@@ -91,8 +91,8 @@ export function AuthProvider({ children }) {
     setSession(null)
   }, [])
 
-  const resetDemo = useCallback(() => {
-    api.resetDemoData()
+  const resetLocalData = useCallback(() => {
+    api.resetLocalData()
     api.persistSession(null)
     setSession(null)
   }, [])
@@ -112,10 +112,10 @@ export function AuthProvider({ children }) {
       signIn,
       signUp,
       signOut,
-      resetDemo,
+      resetLocalData,
       markDeviceValidated,
     }),
-    [session, status, error, signIn, signUp, signOut, resetDemo, markDeviceValidated],
+    [session, status, error, signIn, signUp, signOut, resetLocalData, markDeviceValidated],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

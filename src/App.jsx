@@ -28,6 +28,9 @@ import Profile from '@/pages/app/Profile'
 import Security from '@/pages/app/Security'
 import Statements from '@/pages/app/Statements'
 import Support from '@/pages/app/Support'
+import Investments from '@/pages/app/Investments'
+import Admin from '@/pages/app/Admin'
+import ResetTransactionPin from '@/pages/public/ResetTransactionPin'
 
 function ScrollToTop() {
   const { pathname } = useLocation()
@@ -81,20 +84,13 @@ export default function App() {
               />
               <Route
                 path="/forgot-password"
-                element={
-                  <PublicOnlyRoute>
-                    <ForgotPassword />
-                  </PublicOnlyRoute>
-                }
+                element={<ForgotPassword />}
               />
               <Route
                 path="/reset-password"
-                element={
-                  <PublicOnlyRoute>
-                    <ResetPassword />
-                  </PublicOnlyRoute>
-                }
+                element={<ResetPassword />}
               />
+              <Route path="/reset-transaction-pin" element={<ResetTransactionPin />} />
 
               {/* Authenticated product */}
               <Route
@@ -119,6 +115,8 @@ export default function App() {
                 <Route path="profile" element={<Profile />} />
                 <Route path="security" element={<Security />} />
                 <Route path="statements" element={<Statements />} />
+                <Route path="investments" element={<Investments />} />
+                <Route path="admin" element={<Admin />} />
                 <Route path="support" element={<Support />} />
               </Route>
 

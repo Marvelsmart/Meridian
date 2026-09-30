@@ -1,5 +1,5 @@
 /**
- * Single entry point for the mock-data layer.
+ * Single entry point for the fixture layer.
  * Pages/contexts never import the raw files directly — only `lib/api.js` does,
  * so swapping this folder for real API calls stays a one-file change.
  */

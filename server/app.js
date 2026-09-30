@@ -4,6 +4,7 @@ import helmet from 'helmet'
 import morgan from 'morgan'
 import { authRouter } from './routes/auth.js'
 import { bankingRouter } from './routes/banking.js'
+import { adminRouter } from './routes/admin.js'
 import { errorHandler, notFound } from './middleware/errors.js'
 import { env } from './config/env.js'
 
@@ -16,6 +17,7 @@ export function createApp() {
   app.use(morgan('tiny'))
   app.get('/api/health', (req, res) => res.json({ ok: true }))
   app.use('/api/auth', authRouter)
+  app.use('/api/admin', adminRouter)
   app.use('/api', bankingRouter)
   app.use(notFound); app.use(errorHandler)
   return app

@@ -21,19 +21,17 @@ const ALL_NAV = NAV_GROUPS.flatMap((group) => group.items)
 /** Authenticated application shell: sidebar + header + mobile navigation. */
 export function AppLayout() {
   const { status, error, reload, user, unreadCount } = useAppData()
-  const { signOut, session } = useAuth()
+  const { signOut, session, user: authUser } = useAuth()
   const location = useLocation()
   const [moreOpen, setMoreOpen] = useState(false)
   const [newDeviceAlertOpen, setNewDeviceAlertOpen] = useState(false)
 
   useEffect(() => {
     if (status !== 'ready' || session?.newDeviceLogin !== true) return
-    const alertKey = `northstar:new-device-alert:${session.token}`
-    if (!window.sessionStorage.getItem(alertKey)) setNewDeviceAlertOpen(true)
-  }, [status, session])
+    setNewDeviceAlertOpen(true)
+  }, [status, session?.newDeviceLogin])
 
   const dismissNewDeviceAlert = () => {
-    if (session?.token) window.sessionStorage.setItem(`northstar:new-device-alert:${session.token}`, 'dismissed')
     setNewDeviceAlertOpen(false)
   }
 
@@ -102,7 +100,7 @@ export function AppLayout() {
         </div>
 
         <ul className="mt-3 divide-y divide-ink-100">
-          {MOBILE_MORE_LINKS.map((item) => {
+          {MOBILE_MORE_LINKS.filter((item) => !item.adminOnly || authUser?.role === 'admin').map((item) => {
             const Icon = item.icon
             return (
               <li key={item.to}>

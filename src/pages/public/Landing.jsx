@@ -91,9 +91,9 @@ const ACCOUNT_TYPES = [
 
 const SECURITY_POINTS = [
   { icon: ShieldCheck, title: 'Two-factor auth', body: 'Authenticator app or SMS codes' },
-  { icon: Lock, title: 'Device sessions', body: 'Sign out any device instantly' },
+  { icon: Lock, title: 'New device alerts', body: 'Get notified when an unfamiliar device signs in' },
   { icon: Users, title: 'Login alerts', body: 'Know the moment someone signs in' },
-  { icon: BadgeCheck, title: 'Card controls', body: 'Freeze cards without a phone call' },
+  { icon: BadgeCheck, title: 'Card controls', body: 'Request a staff-reviewed card status change' },
 ]
 
 const STEPS = [
@@ -304,11 +304,10 @@ export default function Landing() {
               You can see everything we do to protect your money.
             </h2>
             <p className="mt-4 max-w-lg text-[14.5px] leading-7 text-white/70">
-              Review your active sessions, approve devices, rotate your password and switch on two-factor
-              authentication — all from the security centre.
+              Receive sign-in alerts, review recent account activity and contact customer care about sensitive account changes.
             </p>
             <Button className="mt-6" to={isAuthenticated ? '/app/security' : '/register'}>
-              {isAuthenticated ? 'Review your sessions' : 'Open a secured account'}
+              {isAuthenticated ? 'Open security centre' : 'Open a secured account'}
             </Button>
           </div>
 

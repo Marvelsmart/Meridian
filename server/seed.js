@@ -25,5 +25,5 @@ for (const source of BENEFICIARIES) await Beneficiary.findOneAndUpdate({ owner: 
 for (const source of CARDS) await Card.findOneAndUpdate({ owner: user._id, last4: source.last4 }, { owner: user._id, account: accounts.find((account) => account.number === ACCOUNTS.find((item) => item.id === source.accountId)?.number)?._id || primary._id, nickname: source.nickname, holderName: source.holderName, panCiphertext: encryptSecret(source.number.replace(/\s/g, '')), cvvCiphertext: encryptSecret(source.cvv), last4: source.last4, expiry: source.expiry, brand: source.brand, type: source.type, currency: source.currency, status: source.status, contactless: source.contactless, limits: source.limits }, { upsert: true, new: true })
 for (const source of NOTIFICATIONS) await Notification.findOneAndUpdate({ owner: user._id, title: source.title, createdAt: source.createdAt }, { ...source, owner: user._id, _id: undefined }, { upsert: true, new: true })
 for (const source of BILL_PROVIDERS) await Biller.findOneAndUpdate({ visibility: 'shared', name: source.name }, { ...source, visibility: 'shared', _id: undefined }, { upsert: true, new: true })
-console.log(`Seeded shared demo data and user ${user.email}`)
+console.log(`Seeded shared data and user ${user.email}`)
 await disconnectDatabase()

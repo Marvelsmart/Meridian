@@ -28,6 +28,7 @@ export const NAV_GROUPS = [
       { label: 'Dashboard', to: '/app/dashboard', icon: LayoutDashboard },
       { label: 'Transactions', to: '/app/transactions', icon: ArrowLeftRight },
       { label: 'Statements', to: '/app/statements', icon: FileText },
+      { label: 'Investments', to: '/app/investments', icon: PiggyBank },
     ],
   },
   {
@@ -46,6 +47,7 @@ export const NAV_GROUPS = [
       { label: 'Profile', to: '/app/profile', icon: UserRound },
       { label: 'Security', to: '/app/security', icon: ShieldCheck },
       { label: 'Support', to: '/app/support', icon: LifeBuoy },
+      { label: 'Administration', to: '/app/admin', icon: Settings, adminOnly: true },
     ],
   },
 ]
@@ -67,14 +69,15 @@ export const MOBILE_MORE_LINKS = [
   { label: 'Statements', to: '/app/statements', icon: FileText, description: 'Download & export' },
   { label: 'Notifications', to: '/app/notifications', icon: Bell, description: 'Alerts & updates' },
   { label: 'Profile', to: '/app/profile', icon: UserRound, description: 'Personal information' },
-  { label: 'Security', to: '/app/security', icon: ShieldCheck, description: 'Password, 2FA, sessions' },
+  { label: 'Security', to: '/app/security', icon: ShieldCheck, description: 'Alerts and sign-in activity' },
   { label: 'Support', to: '/app/support', icon: LifeBuoy, description: 'Chat, call or email us' },
+  { label: 'Administration', to: '/app/admin', icon: Settings, description: 'Customer and approval management', adminOnly: true },
 ]
 
 /** Dashboard quick actions — the 8 primary jobs to be done. */
 export const QUICK_ACTIONS = [
   { label: 'Send Money', icon: Send, to: '/app/transfer', description: 'To any Northstar account' },
-  { label: 'Investments', icon: PiggyBank, to: '/app/statements', description: 'Track your financial goals' },
+  { label: 'Investments', icon: PiggyBank, to: '/app/investments', description: 'View your investment account' },
   { label: 'Add Money', icon: Upload, action: 'deposit', description: 'Fund your account' },
   { label: 'Pay Bills', icon: ReceiptText, to: '/app/bills', description: 'Utilities & TV' },
   { label: 'Cards', icon: CreditCard, to: '/app/cards', description: 'Manage & freeze' },

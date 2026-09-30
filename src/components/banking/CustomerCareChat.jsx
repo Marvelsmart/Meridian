@@ -28,7 +28,7 @@ export function CustomerCareChat() {
               Hi, how can we help? Please do not send your password, PIN, or full account credentials in chat.
             </div>
             <p className="text-center text-[11px] text-ink-400">
-              {ZANGI_SUPPORT_NUMBER ? 'Zangi number saved. Messaging service integration is still required.' : 'Live messaging will be enabled when the Zangi number and messaging service are configured.'}
+              {ZANGI_SUPPORT_NUMBER ? `Zangi customer care: ${ZANGI_SUPPORT_NUMBER}` : 'Live messaging will be enabled when the Zangi number and messaging service are configured.'}
             </p>
           </div>
           <div className="border-t border-ink-100 px-4 py-3 text-[12px] text-ink-500">Messaging is not connected yet.</div>
