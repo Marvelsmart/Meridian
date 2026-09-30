@@ -16,14 +16,15 @@ Add these variables in Vercel Project Settings for Production, Preview, and Deve
 MONGODB_URI=mongodb://...
 JWT_SECRET=long-random-secret
 BANK_MANAGER_CODE=manager-code
-ADMIN_EMAILS=admin@example.com
+ADMIN_EMAIL=your-separate-admin-gmail@gmail.com
+ADMIN_PASSWORD=choose-a-strong-password-at-least-12-characters
 RESEND_API_KEY=re_...
 EMAIL_FROM=Northstar Support <support@your-verified-domain.example>
 CLIENT_ORIGIN=https://your-project.vercel.app
 VITE_API_URL=
 ```
 
-`ADMIN_EMAILS` is a comma-separated allowlist of existing account emails permitted to use the administration page. Keep it server-only; do not prefix it with `VITE_`. The matching account must be registered before the admin page can be used.
+Set `ADMIN_EMAIL` and `ADMIN_PASSWORD` to the separate administrator Gmail and a strong password of at least 12 characters. On API startup, the backend creates or updates that MongoDB user and stores only a bcrypt password hash. These variables are server-only; do not prefix them with `VITE_`. The administrator signs in directly at `/admin`. Do not use customer signup for the admin account.
 
 Configure Resend with a verified sending domain for password recovery and staff-triggered PIN reset links. Reset codes are short-lived, single-use, stored hashed, and never returned by the API.
 

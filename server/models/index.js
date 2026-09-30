@@ -7,7 +7,7 @@ export const User = mongoose.model('User', new Schema({
   firstName: { type: String, required: true, trim: true }, lastName: { type: String, required: true, trim: true },
   email: { type: String, required: true, unique: true, lowercase: true, trim: true, index: true },
   phone: { type: String, required: true, trim: true }, passwordHash: { type: String, required: true, select: false },
-  transactionPinHash: { type: String, select: false }, authVersion: { type: Number, default: 0 }, role: { type: String, enum: ['customer'], default: 'customer' },
+  transactionPinHash: { type: String, select: false }, authVersion: { type: Number, default: 0 }, role: { type: String, enum: ['customer', 'admin'], default: 'customer' },
   verificationStatus: { type: String, enum: ['verified', 'pending', 'under_review', 'action_required'], default: 'pending' },
   security: { type: Schema.Types.Mixed, default: {} }, address: Schema.Types.Mixed, employment: Schema.Types.Mixed,
   transactionPinResetRequired: { type: Boolean, default: false }, passwordResetRequired: { type: Boolean, default: false }, demoDataSeededAt: Date,

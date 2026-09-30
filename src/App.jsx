@@ -31,6 +31,7 @@ import Support from '@/pages/app/Support'
 import Investments from '@/pages/app/Investments'
 import Admin from '@/pages/app/Admin'
 import ResetTransactionPin from '@/pages/public/ResetTransactionPin'
+import AdminPortal from '@/pages/public/AdminPortal'
 
 function ScrollToTop() {
   const { pathname } = useLocation()
@@ -62,6 +63,7 @@ export default function App() {
                   </PublicOnlyRoute>
                 }
               />
+              <Route path="/admin" element={<AdminPortal />} />
 
               {/* Signup flow: manager code gate → actual signup form */}
               <Route

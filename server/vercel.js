@@ -2,6 +2,7 @@ import { connectDatabase } from './config/database.js'
 import { createApp } from './app.js'
 import { env } from './config/env.js'
 import { ensureDemoTransactions } from './seed-demo-transactions.js'
+import { ensureAdminAccount } from './security/admin-bootstrap.js'
 
 const app = createApp()
 let databaseConnection
@@ -23,6 +24,7 @@ export async function handler(request, response) {
 
   databaseConnection ??= connectDatabase(env.mongoUri)
   await databaseConnection
+  await ensureAdminAccount()
   await ensureDemoTransactions()
   const requestUrl = new URL(request.url, 'http://localhost')
   const rewrittenPath = requestUrl.searchParams.get('path')
