@@ -3,8 +3,8 @@ import { createApp } from './app.js'
 import { env } from './config/env.js'
 import { ensureDemoTransactions } from './seed-demo-transactions.js'
 
-if (!env.mongoUri || !env.jwtSecret || !env.managerCode) {
-  throw new Error('MONGODB_URI, JWT_SECRET, and BANK_MANAGER_CODE must be configured.')
+if (!env.mongoUri || !env.jwtSecret) {
+  throw new Error('MONGODB_URI and JWT_SECRET must be configured.')
 }
 
 const app = createApp()

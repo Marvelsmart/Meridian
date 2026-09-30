@@ -17,6 +17,7 @@ function publicUser(user) {
 }
 
 router.post('/manager-code/verify', (req, res) => {
+  if (!env.managerCode) return res.status(503).json({ error: 'Account registration is temporarily unavailable. Bank Manager Code is not configured.' })
   const code = String(req.body.code || '').trim()
   if (!code || code.toUpperCase() !== env.managerCode.trim().toUpperCase()) return res.status(403).json({ error: 'Invalid Bank Manager Code. Please check the code and try again.' })
   res.json({ valid: true })
@@ -24,6 +25,7 @@ router.post('/manager-code/verify', (req, res) => {
 
 router.post('/register', async (req, res) => {
   const input = registration.parse(req.body)
+  if (!env.managerCode) return res.status(503).json({ error: 'Account registration is temporarily unavailable. Bank Manager Code is not configured.' })
   if (env.adminEmails.includes(input.email.trim().toLowerCase())) return res.status(409).json({ error: 'This administrator account must already exist before it is added to the server allowlist.' })
   if (input.managerCode.trim().toUpperCase() !== env.managerCode.trim().toUpperCase()) return res.status(403).json({ error: 'Invalid bank manager code' })
   const passwordHash = await bcrypt.hash(input.password, 12)
