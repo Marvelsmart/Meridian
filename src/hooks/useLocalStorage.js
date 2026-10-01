@@ -23,7 +23,7 @@ export function useLocalStorage(key, initialValue) {
 export function useDocumentTitle(title) {
   useEffect(() => {
     const previous = document.title
-    if (title) document.title = `${title} · Northstar`
+    if (title) document.title = `${title} · Nortwest Bank`
     return () => {
       document.title = previous
     }

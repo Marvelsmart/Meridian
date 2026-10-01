@@ -29,14 +29,14 @@ export function AuthLayout({ title, subtitle, children, footer = null, points = 
         </div>
 
         <p className="text-[12px] text-ink-500">
-          Northstar Bank · Secure digital banking
+          Nortwest Bank · Secure digital banking
         </p>
       </div>
 
       <aside className="relative hidden flex-1 overflow-hidden bg-ink-900 lg:block">
         <div className="pointer-events-none absolute -right-24 top-10 size-72 rounded-full bg-brand-600/20 blur-3xl" aria-hidden="true" />
         <div className="relative flex h-full flex-col justify-center px-14 xl:px-20">
-          <p className="text-[12px] font-medium uppercase tracking-[0.16em] text-white/40">Northstar digital banking</p>
+          <p className="text-[12px] font-medium uppercase tracking-[0.16em] text-white/40">Nortwest digital banking</p>
           <h2 className="mt-5 max-w-md text-[30px] font-semibold leading-[1.2] tracking-[-0.02em] text-white">
             One account for spending, saving and everything in between.
           </h2>

@@ -115,7 +115,7 @@ export default function Register() {
       lockManagerCode()
       toast.success(
         'Account created',
-        `Your Northstar account is ready with an opening balance of ${formatCurrency(initialBalance)}.`,
+        `Your Nortwest account is ready with an opening balance of ${formatCurrency(initialBalance)}.`,
       )
       navigate('/app/dashboard', { replace: true })
     } catch (error) {
@@ -128,8 +128,8 @@ export default function Register() {
 
   return (
     <AuthLayout
-      title="Open your Northstar account"
-      subtitle="It takes about two minutes. Choose the opening balance you want to start with — your Everyday account comes with a $25,000 daily transfer limit."
+      title="Open your Nortwest account"
+      subtitle="It takes about two minutes. Choose the opening balance you want to start with."
       points={[
         'Checking, savings and travel accounts in one login',
         'Virtual cards created instantly',
@@ -282,7 +282,7 @@ export default function Register() {
             setFormError(null)
           }}
           label="I agree to the terms of service and privacy policy"
-          description="Northstar may verify my identity using the details provided."
+          description="Nortwest may verify my identity using the details provided."
         />
 
         <Button type="submit" size="lg" fullWidth loading={submitting}>

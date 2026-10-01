@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 import { cn } from '@/lib/cn'
 import { BRAND } from '@/lib/constants'
 
-/** Meridian wordmark: a restrained geometric mark plus the name. */
+/** Nortwest wordmark: a restrained geometric mark plus the name. */
 export function Logo({ to = '/', inverted = false, size = 'md', showName = true, className = '' }) {
   const marks = { sm: 'size-7 text-[12px]', md: 'size-8 text-[13px]', lg: 'size-10 text-[15px]' }
   const names = { sm: 'text-[15px]', md: 'text-[16.5px]', lg: 'text-[19px]' }
@@ -17,7 +17,7 @@ export function Logo({ to = '/', inverted = false, size = 'md', showName = true,
         )}
         aria-hidden="true"
       >
-        M
+        N
       </span>
       {showName ? (
         <span className={cn('flex flex-col', names[size] ?? names.md)}>

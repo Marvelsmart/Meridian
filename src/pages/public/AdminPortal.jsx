@@ -73,7 +73,7 @@ export default function AdminPortal() {
         <Input label="Administrator email" type="email" autoComplete="username" value={credentials.email} onChange={update('email')} required />
         <Input label="Administrator password" type="password" autoComplete="current-password" value={credentials.password} onChange={update('password')} required />
         <Button type="submit" size="lg" fullWidth loading={submitting} icon={ShieldCheck}>Sign in to administration</Button>
-        <Link to="/" className="block text-center text-[12.5px] font-medium text-ink-500 hover:text-ink-900">Return to Northstar</Link>
+        <Link to="/" className="block text-center text-[12.5px] font-medium text-ink-500 hover:text-ink-900">Return to Nortwest</Link>
       </form>
     </AuthLayout>
   )

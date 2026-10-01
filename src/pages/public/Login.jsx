@@ -32,7 +32,7 @@ export default function Login() {
     setFormError(null)
     try {
       await signIn(values)
-      toast.success('Signed in successfully', 'Welcome back to Northstar.')
+      toast.success('Signed in successfully', 'Welcome back to Nortwest.')
       navigate(location.state?.from ?? '/app/dashboard', { replace: true })
     } catch (error) {
       setErrors(error.fields ?? {})
@@ -45,7 +45,7 @@ export default function Login() {
   return (
     <AuthLayout
       title="Sign in to your account"
-      subtitle="Use your Northstar credentials to access your accounts, cards and transactions."
+      subtitle="Use your Nortwest credentials to access your accounts, cards and transactions."
       points={[
         'Balances and transactions in real time',
         'Freeze and unfreeze cards instantly',
@@ -53,7 +53,7 @@ export default function Login() {
       ]}
       footer={
         <p>
-          New to Northstar?{' '}
+          New to Nortwest?{' '}
           <Link to="/register" className="font-semibold text-brand-700 hover:underline">
             Open an account
           </Link>

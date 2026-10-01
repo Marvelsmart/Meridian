@@ -77,7 +77,7 @@ export default function Statements() {
     const url = URL.createObjectURL(blob)
     const anchor = document.createElement('a')
     anchor.href = url
-    anchor.download = `northstar-statement-${from}-${to}.csv`
+    anchor.download = `nortwest-statement-${from}-${to}.csv`
     document.body.appendChild(anchor)
     anchor.click()
     document.body.removeChild(anchor)

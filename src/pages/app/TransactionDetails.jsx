@@ -84,7 +84,7 @@ export default function TransactionDetails() {
     const reference = transaction.reference ?? transaction.id ?? 'receipt'
     const fee = Number(transaction.fee ?? 0)
     const lines = [
-      'Northstar — transaction receipt',
+      'Nortwest Bank — transaction receipt',
       `Description,${transaction.description ?? ''}`,
       `Transaction ID,${transaction.id ?? ''}`,
       `Reference,${reference}`,
@@ -105,7 +105,7 @@ export default function TransactionDetails() {
     ]
     downloadFile({
       content: lines.join('\n'),
-      filename: `northstar-receipt-${reference}.csv`,
+      filename: `nortwest-receipt-${reference}.csv`,
       mimeType: 'text/csv',
     })
     toast.success('Receipt downloaded', `${reference} saved as CSV.`)

@@ -31,7 +31,7 @@ export default function ForgotPassword() {
   return (
     <AuthLayout
       title="Forgot your password?"
-      subtitle="Enter the email on your Northstar account and we will send a 6-digit reset code."
+      subtitle="Enter the email on your Nortwest account and we will send a 6-digit reset code."
       backTo="/login"
       backLabel="Back to sign in"
       footer={

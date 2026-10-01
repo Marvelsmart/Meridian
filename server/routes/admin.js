@@ -78,10 +78,10 @@ router.post('/customers', async (req, res) => {
       ledgerBalance: 0,
       available: 0,
       primary: true,
-      bank: 'Northstar Bank',
+      bank: 'Nortwest Bank',
       openedOn: new Date(),
       currency: 'USD',
-      limits: { dailyTransfer: 20000, singleTransfer: 10000 },
+      limits: { dailyTransfer: 20000 },
     })
     await sendResetCode(user, 'password')
     await sendResetCode(user, 'transaction_pin')

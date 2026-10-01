@@ -35,7 +35,7 @@ export default function NotificationsPage() {
         <div>
           <h1 className="text-[22px] font-semibold tracking-[-0.02em] text-ink-900 sm:text-[24px]">Notifications</h1>
           <p className="mt-1 text-[13.5px] leading-6 text-ink-500">
-            Security, account and transaction updates from Northstar.
+            Security, account and transaction updates from Nortwest.
           </p>
         </div>
         <Button variant="secondary" icon={CheckCheck} onClick={handleReadAll} disabled={!unreadCount}>

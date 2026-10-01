@@ -55,7 +55,7 @@ export default function ResetPassword() {
       <AuthLayout title="Password updated" subtitle="Your new password is ready to use." backTo="/login" backLabel="Back to sign in">
         <div className="space-y-5">
           <Alert tone="success" icon={CheckCircle2} title="All set">
-            Your Northstar password was changed successfully. Sign in again with the new password.
+            Your Nortwest password was changed successfully. Sign in again with the new password.
           </Alert>
           <Button size="lg" fullWidth onClick={() => navigate('/login', { replace: true })}>
             Sign in

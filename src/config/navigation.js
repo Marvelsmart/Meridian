@@ -76,7 +76,7 @@ export const MOBILE_MORE_LINKS = [
 
 /** Dashboard quick actions — the 8 primary jobs to be done. */
 export const QUICK_ACTIONS = [
-  { label: 'Send Money', icon: Send, to: '/app/transfer', description: 'To any Northstar account' },
+  { label: 'Send Money', icon: Send, to: '/app/transfer', description: 'To any Nortwest account' },
   { label: 'Investments', icon: PiggyBank, to: '/app/investments', description: 'View your investment account' },
   { label: 'Add Money', icon: Upload, action: 'deposit', description: 'Fund your account' },
   { label: 'Pay Bills', icon: ReceiptText, to: '/app/bills', description: 'Utilities & TV' },

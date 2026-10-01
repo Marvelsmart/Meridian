@@ -3,7 +3,7 @@ export const SECURITY_TIPS = [
   {
     id: 'tip_01',
     title: 'Never share your transaction PIN',
-    body: 'Northstar staff will never ask for your PIN, OTP or password — on any channel.',
+    body: 'Nortwest staff will never ask for your PIN, OTP or password — on any channel.',
   },
   {
     id: 'tip_02',

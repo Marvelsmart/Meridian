@@ -30,7 +30,7 @@ router.post('/register', async (req, res) => {
   if (input.managerCode.trim().toUpperCase() !== env.managerCode.trim().toUpperCase()) return res.status(403).json({ error: 'Invalid bank manager code' })
   const passwordHash = await bcrypt.hash(input.password, 12)
   const user = await User.create({ firstName: input.firstName.trim(), lastName: input.lastName.trim(), email: input.email.toLowerCase(), phone: input.phone, passwordHash, transactionPinHash: input.transactionPin ? await bcrypt.hash(input.transactionPin, 12) : undefined, verificationStatus: 'pending' })
-  const account = await Account.create({ owner: user._id, name: 'Freedom Checking', type: 'checking', number: `0${crypto.randomInt(100000000, 999999999)}`, balance: input.initialBalance, ledgerBalance: input.initialBalance, available: input.initialBalance, primary: true, bank: 'Northstar Bank', openedOn: new Date(), currency: 'USD', limits: { dailyTransfer: 20000, singleTransfer: 10000 } })
+  const account = await Account.create({ owner: user._id, name: 'Freedom Checking', type: 'checking', number: `0${crypto.randomInt(100000000, 999999999)}`, balance: input.initialBalance, ledgerBalance: input.initialBalance, available: input.initialBalance, primary: true, bank: 'Nortwest Bank', openedOn: new Date(), currency: 'USD', limits: { dailyTransfer: 20000 } })
   const deviceId = req.headers['x-device-id'] || crypto.randomUUID()
   await Device.create({ owner: user._id, deviceId, trusted: false, lastSeenAt: new Date() })
   res.status(201).json({ token: signToken(user, deviceId), user: publicUser(user), account: { id: account.id, balance: account.balance }, deviceValidated: false })

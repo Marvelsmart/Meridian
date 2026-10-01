@@ -58,7 +58,7 @@ export default function BillPayments() {
       <div>
         <h1 className="text-[22px] font-semibold tracking-[-0.02em] text-ink-900 sm:text-[24px]">Bill payments</h1>
         <p className="mt-1 text-[13.5px] leading-6 text-ink-500">
-          Pay utilities, cable and internet bills without leaving Northstar.
+          Pay utilities, cable and internet bills without leaving Nortwest.
         </p>
       </div>
 

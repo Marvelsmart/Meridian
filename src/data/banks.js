@@ -9,7 +9,7 @@ export const BANKS = [
   { code: '122242607', name: 'U.S. Bank', short: 'U.S. Bank' },
   { code: '091000019', name: 'PNC Bank', short: 'PNC' },
   { code: '151023121', name: 'Discover Bank', short: 'Discover' },
-  { code: '000014', name: 'Northstar Savings Vault', short: 'Northstar Vault' },
+  { code: '000014', name: 'Nortwest Savings Vault', short: 'Nortwest Vault' },
 ]
 
 export const BANK_BY_CODE = BANKS.reduce((map, bank) => {

@@ -24,7 +24,7 @@ export async function sendResetCode(user, purpose) {
       body: JSON.stringify({
         from: env.emailFrom,
         to: [user.email],
-        subject: `${title} · Northstar`,
+        subject: `${title} · Nortwest Bank`,
         html: `<p>${title}</p><p>This one-time code expires in 15 minutes:</p><p style="font-size:24px;font-weight:bold;letter-spacing:4px">${code}</p><p><a href="${resetUrl}">Continue securely</a></p><p>If you did not request this, contact customer care. Never share this code with anyone.</p>`,
       }),
     })

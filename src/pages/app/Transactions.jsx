@@ -101,10 +101,10 @@ export default function Transactions() {
     }
     downloadFile({
       content: transactionsToCsv(items, {
-        title: 'Northstar — filtered transactions',
+        title: 'Nortwest Bank — filtered transactions',
         period: `${toInputDate(from ?? new Date())} to ${toInputDate(to ?? new Date())}`,
       }),
-      filename: `northstar-transactions-${toInputDate(new Date())}.csv`,
+      filename: `nortwest-transactions-${toInputDate(new Date())}.csv`,
       mimeType: 'text/csv',
     })
     toast.success('Export ready', `${items.length} transactions downloaded as CSV.`)

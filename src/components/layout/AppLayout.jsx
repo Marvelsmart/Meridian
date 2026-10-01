@@ -83,7 +83,7 @@ export function AppLayout() {
       <DeviceValidationModal open={newDeviceAlertOpen} onClose={dismissNewDeviceAlert} />
       <CustomerCareChat />
 
-      <Drawer open={moreOpen} onClose={() => setMoreOpen(false)} side="bottom" title="More" description="Everything else you can do with Northstar">
+      <Drawer open={moreOpen} onClose={() => setMoreOpen(false)} side="bottom" title="More" description="Everything else you can do with Nortwest">
         <div className="flex items-center gap-3 rounded-card border border-ink-200 p-3.5">
           <Avatar name={`${user?.firstName ?? ''} ${user?.lastName ?? ''}`} tone="brand" />
           <div className="min-w-0 flex-1">

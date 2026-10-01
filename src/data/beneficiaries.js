@@ -121,9 +121,9 @@ export const BENEFICIARIES = [
   },
   {
     id: 'ben_09',
-    name: 'Northstar Savings Vault',
+    name: 'Nortwest Savings Vault',
     nickname: 'My vault',
-    bank: 'Northstar Bank',
+    bank: 'Nortwest Bank',
     bankCode: '000014',
     accountNumber: '0000000000',
     email: null,
@@ -137,7 +137,7 @@ export const BENEFICIARIES = [
 ]
 
 export const BENEFICIARY_TYPE_LABEL = {
-  chase: 'Northstar',
+  chase: 'Nortwest',
   bank: 'Other bank',
   internal: 'Internal',
 }

@@ -40,7 +40,7 @@ export function WithdrawDialog({ open, onClose }) {
       open={open}
       onClose={onClose}
       title={flow.isSuccess ? undefined : 'Withdraw cash'}
-      description={flow.isSuccess ? undefined : 'Generate an approval code for any Northstar ATM.'}
+      description={flow.isSuccess ? undefined : 'Generate an approval code for any Nortwest ATM.'}
     >
       {flow.isForm ? (
         <div className="space-y-5">
@@ -74,7 +74,7 @@ export function WithdrawDialog({ open, onClose }) {
             checked={charges}
             onChange={setCharges}
             label="Include standard ATM charge ($3.50)"
-            description="Charged for withdrawals outside Northstar ATMs."
+            description="Charged for withdrawals outside Nortwest ATMs."
           />
 
           <ReviewList

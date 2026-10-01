@@ -101,7 +101,6 @@ export default function Transfer() {
             onChange={flow.setAmount}
             presets={[5000, 10000, 25000, 50000, 100000]}
             available={flow.selectedAccount?.available}
-            hint={`Single transfer limit: ${formatCurrency(flow.selectedAccount?.limits?.singleTransfer ?? 0)}`}
             autoFocus
           />
 

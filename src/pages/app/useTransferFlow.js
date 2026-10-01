@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import * as api from '@/lib/api'
-import { formatCurrency } from '@/lib/format'
 
 export const TRANSFER_STEPS = [
   { value: 'recipient', label: 'Recipient' },
@@ -74,11 +73,6 @@ export function useTransferFlow({ accounts, activeAccount, actions, searchParams
       if (!amountValue) return setError('Enter an amount to continue.')
       if (amountValue < 100) return setError('The minimum transfer amount is $100.')
       if (amountValue > selectedAccount.available) return setError('That amount is more than your available balance.')
-      if (amountValue > selectedAccount.limits.singleTransfer) {
-        return setError(
-          `Single transfers on this account are limited to ${formatCurrency(selectedAccount.limits.singleTransfer)}.`,
-        )
-      }
     }
     if (step === 'description' && !narration.trim()) {
       return setError('Add a short description so you recognise this transfer later.')
