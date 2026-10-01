@@ -9,12 +9,10 @@
 import {
   ArrowRight,
   BadgeCheck,
-  Clock,
   CreditCard,
   Globe,
   Lock,
-  Mail,
-  Phone,
+  MessageCircle,
   PiggyBank,
   ReceiptText,
   Send,
@@ -103,9 +101,7 @@ const STEPS = [
 ]
 
 const SUPPORT_DETAILS = [
-  { icon: Phone, label: 'Call us', value: BRAND.supportPhone },
-  { icon: Mail, label: 'Email us', value: BRAND.supportEmail },
-  { icon: Clock, label: 'Opening hours', value: 'Phone lines open 24/7, every day of the year' },
+  { icon: MessageCircle, label: 'Customer care', value: 'Chat with our team in the app' },
 ]
 
 export default function Landing() {
@@ -255,7 +251,7 @@ export default function Landing() {
           <div className="overflow-hidden rounded-card border border-ink-200 bg-white shadow-card">
             <img
               src={supportImage}
-              alt="Bank support specialists answering customer calls at their desks in a bright operations floor"
+              alt="Customer-care specialists helping customers at their desks in a bright operations floor"
               className="h-72 w-full object-cover sm:h-96"
               loading="lazy"
               decoding="async"
@@ -289,8 +285,8 @@ export default function Landing() {
               })}
             </dl>
 
-            <Button className="mt-7" variant="secondary" to={isAuthenticated ? '/app/support' : '/login'}>
-              {isAuthenticated ? 'Open the support centre' : 'Sign in to message us'}
+            <Button className="mt-7" variant="secondary" icon={MessageCircle} to={isAuthenticated ? '/app/support' : '/login'}>
+              {isAuthenticated ? 'Chat with customer care' : 'Sign in to chat'}
             </Button>
           </div>
         </div>

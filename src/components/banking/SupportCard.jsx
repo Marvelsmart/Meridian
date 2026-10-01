@@ -1,6 +1,5 @@
-import { LifeBuoy, Mail, MessageCircle, Phone } from 'lucide-react'
+import { LifeBuoy, MessageCircle } from 'lucide-react'
 import { cn } from '@/lib/cn'
-import { SUPPORT_CHANNELS } from '@/config/support'
 import { Button } from '@/components/ui'
 
 /**
@@ -42,28 +41,12 @@ export function SupportCard({
         onClick={openChat}
         aria-label="Open customer care chat"
       >
-        Chat with Support
+        Chat with customer care
       </Button>
 
       <p className="mt-2 text-[11.5px] leading-5 text-ink-400">
-        In-app customer care chat.
+        Customer care is available through in-app chat.
       </p>
-
-      {compact ? null : (
-        <ul className="mt-3 space-y-2 border-t border-ink-100 pt-3 text-[12.5px] text-ink-600">
-          <li className="flex items-center gap-2">
-            <Phone className="size-3.5 shrink-0 text-ink-400" aria-hidden="true" />
-            {SUPPORT_CHANNELS.phone}
-          </li>
-          <li className="flex items-center gap-2">
-            <Mail className="size-3.5 shrink-0 text-ink-400" aria-hidden="true" />
-            <a href={`mailto:${SUPPORT_CHANNELS.email}`} className="truncate hover:text-ink-900 hover:underline">
-              {SUPPORT_CHANNELS.email}
-            </a>
-          </li>
-          <li className="text-ink-500">{SUPPORT_CHANNELS.hours}</li>
-        </ul>
-      )}
     </div>
   )
 }

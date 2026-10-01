@@ -4,7 +4,6 @@ import { CheckCircle2, ShieldCheck } from 'lucide-react'
 import { useToast } from '@/context/ToastContext'
 import { useAuth } from '@/context/AuthContext'
 import * as api from '@/lib/api'
-import { BRAND } from '@/lib/constants'
 import { useDocumentTitle } from '@/hooks/useLocalStorage'
 import { Alert, Button, Input } from '@/components/ui'
 import { AuthLayout } from '@/components/layout/AuthLayout'
@@ -61,7 +60,7 @@ export default function ResetPassword() {
             Sign in
           </Button>
           <p className="text-[12.5px] text-ink-500">
-            Need help instead? Contact support on {BRAND.supportEmail}.{' '}
+            Need help instead? Use customer-care chat.{' '}
             <Link to="/forgot-password" className="font-medium text-brand-700 hover:underline">
               Request another code
             </Link>

@@ -4,7 +4,6 @@ import { BRAND } from '@/lib/constants'
 import { Button } from '@/components/ui'
 import { SupportCard } from '@/components/banking'
 import { CustomerCareChat } from '@/components/banking/CustomerCareChat'
-import { ZANGI_SUPPORT_NUMBER } from '@/config/support'
 import { useAuth } from '@/context/AuthContext'
 import { Logo } from './Logo'
 
@@ -100,17 +99,12 @@ export function PublicLayout() {
               { label: `About ${BRAND.name}`, to: '/' },
               { label: 'Careers', to: '/' },
               { label: 'Press', to: '/' },
-              { label: 'Contact', to: '/' },
+              { label: 'Customer care', to: isAuthenticated ? '/app/support' : '/login' },
             ]}
           />
           <div>
             <h3 className="text-[13px] font-semibold text-ink-900">Support</h3>
-            <ul className="mt-3 space-y-2.5 text-[13px] text-ink-500">
-              <li>{BRAND.supportPhone}</li>
-              <li>Zangi: {ZANGI_SUPPORT_NUMBER}</li>
-              <li>{BRAND.supportEmail}</li>
-              <li>{BRAND.address}</li>
-            </ul>
+            <p className="mt-3 text-[13px] text-ink-500">Chat with customer care in the app.</p>
             <SupportCard variant="compact" title="Need help?" description="Open the customer-care chat." className="mt-4" />
             <ul className="mt-5 space-y-2 text-[12.5px] text-ink-400">
               <li className="flex items-center gap-2">

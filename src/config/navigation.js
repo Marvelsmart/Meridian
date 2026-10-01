@@ -70,7 +70,7 @@ export const MOBILE_MORE_LINKS = [
   { label: 'Notifications', to: '/app/notifications', icon: Bell, description: 'Alerts & updates' },
   { label: 'Profile', to: '/app/profile', icon: UserRound, description: 'Personal information' },
   { label: 'Security', to: '/app/security', icon: ShieldCheck, description: 'Alerts and sign-in activity' },
-  { label: 'Support', to: '/app/support', icon: LifeBuoy, description: 'Chat, call or email us' },
+  { label: 'Support', to: '/app/support', icon: LifeBuoy, description: 'Chat with customer care' },
   { label: 'Administration', to: '/app/admin', icon: Settings, description: 'Customer and approval management', adminOnly: true },
 ]
 
