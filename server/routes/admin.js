@@ -1,8 +1,9 @@
 import { Router } from 'express'
+import mongoose from 'mongoose'
 import bcrypt from 'bcryptjs'
 import crypto from 'node:crypto'
 import { z } from 'zod'
-import { Account, AccountResetToken, AdminAuditLog, Card, Notification, SupportConversation, SupportMessage, User } from '../models/index.js'
+import { Account, AccountResetToken, AdminAuditLog, Beneficiary, Biller, BillPayment, Card, Device, Notification, SupportConversation, SupportMessage, Transaction, User } from '../models/index.js'
 import { requireAdmin, requireAuth } from '../middleware/auth.js'
 import { env } from '../config/env.js'
 import { sendResetCode } from '../security/account-reset.js'
@@ -146,6 +147,55 @@ router.post('/customers/:id/reset-password', async (req, res) => {
   await recordAdminAction(req, 'customer.password_reset_flagged', 'customer', user._id)
   await Notification.create({ owner: user._id, category: 'security', title: 'Password reset required', body: 'A one-time password reset link was sent to your email address.', read: false, important: true })
   res.json({ success: true })
+})
+
+router.delete('/customers/:id', async (req, res) => {
+  const input = z.object({ confirmEmail: z.string().email().transform((email) => email.toLowerCase()) }).strict().parse(req.body)
+  const session = await mongoose.startSession()
+  let deletedCounts = {}
+  let responseError = null
+  try {
+    await session.withTransaction(async () => {
+      deletedCounts = {}
+      responseError = null
+      const user = await User.findOne({ _id: req.params.id, ...ordinaryCustomerFilter }).session(session)
+      if (!user) {
+        responseError = { status: 404, error: 'Customer not found.' }
+        return
+      }
+      if (input.confirmEmail !== user.email) {
+        responseError = { status: 400, error: 'Confirmation email does not match the selected customer.' }
+        return
+      }
+
+      const conversations = await SupportConversation.find({ owner: user._id }).select('_id').session(session).lean()
+      const conversationIds = conversations.map(({ _id }) => _id)
+      const deletions = [
+        ['resetTokens', AccountResetToken.deleteMany({ owner: user._id }, { session })],
+        ['accounts', Account.deleteMany({ owner: user._id }, { session })],
+        ['transactions', Transaction.deleteMany({ owner: user._id }, { session })],
+        ['beneficiaries', Beneficiary.deleteMany({ owner: user._id }, { session })],
+        ['billers', Biller.deleteMany({ owner: user._id }, { session })],
+        ['billPayments', BillPayment.deleteMany({ owner: user._id }, { session })],
+        ['cards', Card.deleteMany({ owner: user._id }, { session })],
+        ['devices', Device.deleteMany({ owner: user._id }, { session })],
+        ['notifications', Notification.deleteMany({ owner: user._id }, { session })],
+        ['supportMessages', SupportMessage.deleteMany({ $or: [{ owner: user._id }, { conversation: { $in: conversationIds } }] }, { session })],
+        ['supportConversations', SupportConversation.deleteMany({ owner: user._id }, { session })],
+      ]
+      for (const [name, operation] of deletions) {
+        const result = await operation
+        deletedCounts[name] = result.deletedCount
+      }
+      await AdminAuditLog.updateMany({ targetType: 'customer', targetId: String(user._id), 'details.email': user.email }, { $unset: { 'details.email': 1 } }, { session })
+      await User.deleteOne({ _id: user._id }, { session })
+      await AdminAuditLog.create([{ actor: req.user._id, action: 'customer.deleted', targetType: 'customer', targetId: String(user._id), details: deletedCounts }], { session })
+    })
+  } finally {
+    await session.endSession()
+  }
+  if (responseError) return res.status(responseError.status).json({ error: responseError.error })
+  res.json({ success: true, deletedCounts })
 })
 
 router.get('/card-requests', async (req, res) => {

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Navigate } from 'react-router-dom'
-import { Check, Search, Shield, ShieldAlert, UserPlus, UserRound, X } from 'lucide-react'
+import { Check, Search, Shield, ShieldAlert, Trash2, UserPlus, UserRound, X } from 'lucide-react'
 import * as api from '@/lib/api'
 import { useAuth } from '@/context/AuthContext'
 import { useToast } from '@/context/ToastContext'
@@ -30,6 +30,7 @@ export default function Admin() {
   const [createForm, setCreateForm] = useState(EMPTY_NEW_CUSTOMER)
   const [createOpen, setCreateOpen] = useState(false)
   const [creating, setCreating] = useState(false)
+  const [deleting, setDeleting] = useState(false)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
@@ -119,6 +120,24 @@ export default function Admin() {
     }
   }
 
+  const deleteCustomer = async () => {
+    const confirmation = window.prompt(`Permanently delete ${selected.email} and all linked records? Type the email to confirm.`)
+    if (confirmation === null) return
+    setDeleting(true)
+    try {
+      await api.adminDeleteCustomer(selectedId, confirmation.trim())
+      setCustomers((current) => current.filter((customer) => String(customer.id ?? customer._id) !== String(selectedId)))
+      setSelectedId('')
+      setProfile(EMPTY_PROFILE)
+      toast.success('Customer account deleted', 'All linked customer records were permanently removed.')
+      await refresh()
+    } catch (err) {
+      toast.error('Customer account was not deleted', err.message)
+    } finally {
+      setDeleting(false)
+    }
+  }
+
   const reviewCardRequest = async (cardId, decision) => {
     try {
       await api.adminReviewCardRequest(cardId, decision)
@@ -200,6 +219,10 @@ export default function Admin() {
                     <Button type="button" variant="secondary" size="sm" onClick={() => flagReset('password')}>Send password reset email</Button>
                   </div>
                   <p className="mt-2 text-[11.5px] leading-5 text-ink-500">Codes are single-use and emailed directly. The admin never sees a customer’s secret.</p>
+                  <div className="mt-4 border-t border-ink-100 pt-3">
+                    <Button type="button" variant="danger-ghost" size="sm" icon={Trash2} loading={deleting} onClick={deleteCustomer}>Delete customer account</Button>
+                    <p className="mt-2 text-[11.5px] leading-5 text-danger-700">Permanently removes the customer and linked account, transaction, card, and support records.</p>
+                  </div>
                 </div>
               </form>
             ) : <p className="text-[13px] text-ink-500">{loading ? 'Loading customers…' : 'Select a customer to review.'}</p>}

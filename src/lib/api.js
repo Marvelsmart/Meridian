@@ -184,6 +184,7 @@ export async function adminCreateCustomer(payload) { return requestBackend('/adm
 export async function adminUpdateCustomer(id, patch) { return requestBackend(`/admin/customers/${encodeURIComponent(id)}`, { method: 'PATCH', body: JSON.stringify(patch) }) }
 export async function adminResetCustomerPin(id) { return requestBackend(`/admin/customers/${encodeURIComponent(id)}/reset-pin`, post({})) }
 export async function adminResetCustomerPassword(id) { return requestBackend(`/admin/customers/${encodeURIComponent(id)}/reset-password`, post({})) }
+export async function adminDeleteCustomer(id, confirmEmail) { return requestBackend(`/admin/customers/${encodeURIComponent(id)}`, { method: 'DELETE', body: JSON.stringify({ confirmEmail }) }) }
 export async function adminListCardRequests() { return requestBackend('/admin/card-requests') }
 export async function adminReviewCardRequest(id, decision) { return requestBackend(`/admin/card-requests/${encodeURIComponent(id)}/review`, post({ decision })) }
 export async function listSupportConversations() { return requestBackend('/support/conversations') }
