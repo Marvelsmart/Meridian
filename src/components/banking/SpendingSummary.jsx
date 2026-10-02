@@ -13,7 +13,7 @@ const SLICE_COLORS = ['#243fe0', '#121822', '#10b981', '#f59e0b', '#f43f5e', '#9
 export function SpendingSummary({ data = [], total = 0, loading = false, className = '' }) {
   if (loading) {
     return (
-      <div className={cn('flex items-center gap-6', className)}>
+      <div className={cn('flex flex-col gap-5 xl:flex-row xl:items-center', className)}>
         <div className="size-36 animate-pulse rounded-full bg-ink-100" />
         <div className="flex-1 space-y-3">
           {[0, 1, 2].map((row) => (
@@ -32,7 +32,7 @@ export function SpendingSummary({ data = [], total = 0, loading = false, classNa
     : slices
 
   return (
-    <div className={cn('flex flex-col gap-5 sm:flex-row sm:items-center', className)}>
+    <div className={cn('flex flex-col gap-5 xl:flex-row xl:items-center', className)}>
       <div className="relative mx-auto size-40 shrink-0">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>

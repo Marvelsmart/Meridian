@@ -49,11 +49,10 @@ export function BalanceCard({
   }
 
   return (
-    <div className={cn('relative overflow-hidden rounded-card bg-ink-900 p-4 text-white shadow-pop sm:p-6', className)}>
-      <div
-        className="pointer-events-none absolute -right-16 -top-24 size-56 rounded-full bg-brand-600/20 blur-2xl"
-        aria-hidden="true"
-      />
+    <div className={cn('relative isolate rounded-card bg-ink-900 p-4 text-white shadow-pop sm:p-6', className)}>
+      <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-card" aria-hidden="true">
+        <div className="absolute -right-16 -top-24 size-56 rounded-full bg-brand-600/20 blur-2xl" />
+      </div>
 
       <div className="relative flex items-start justify-between gap-4">
         <div className="min-w-0" ref={switcherRef}>

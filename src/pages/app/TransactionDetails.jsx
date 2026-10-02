@@ -200,7 +200,7 @@ export default function TransactionDetails() {
         ) : null}
       </Card>
 
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <SectionCard title="Transaction details">
           <DescriptionList>
             <DetailRow label="Merchant" value={counterpartyName ?? transaction.description ?? '—'} />

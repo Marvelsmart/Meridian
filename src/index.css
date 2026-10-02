@@ -71,13 +71,6 @@ love yah
   html {
     -webkit-text-size-adjust: 100%;
     scroll-behavior: smooth;
-    /**
-     * Page-level overflow guard. `clip` (not `hidden`) is deliberate: it stops
-     * the document from ever scrolling sideways because of one oversized child,
-     * while still leaving html as the scroll container so the sticky headers
-     * (`Header`, `MobileHeader`, `PublicLayout`) keep working.
-     */
-    overflow-x: clip;
     /* App-like feel on touch devices: no grey flash on tap. */
     -webkit-tap-highlight-color: transparent;
   }
@@ -90,9 +83,7 @@ love yah
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     font-feature-settings: 'cv11', 'ss01';
-    /* Belt and braces: nothing inside a page may widen the viewport. */
     max-width: 100%;
-    overflow-x: clip;
   }
 
   /* Media can never push a card wider than its container. */

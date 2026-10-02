@@ -150,7 +150,7 @@ export default function Admin() {
 
   return (
     <div className="space-y-5">
-      <header className="flex items-end justify-between gap-3">
+      <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="flex items-center gap-2 text-[12px] font-semibold uppercase text-brand-700"><Shield className="size-4" aria-hidden="true" /> Staff tools</p>
           <h1 className="mt-1 text-[22px] font-semibold text-ink-900 sm:text-[24px]">Administration</h1>

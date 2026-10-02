@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom'
 /** The 8 primary jobs on the dashboard — a grid, not a carousel. */
 export function QuickActions({ onAction = null, className = '' }) {
   return (
-    <div className={cn('grid grid-cols-4 gap-1.5 sm:gap-2 lg:grid-cols-8 lg:gap-3', className)}>
+    <div className={cn('grid grid-cols-[repeat(auto-fit,minmax(64px,1fr))] gap-1.5 sm:gap-2 xl:gap-3', className)}>
       {QUICK_ACTIONS.map((action) => {
         const Icon = action.icon
         const content = (

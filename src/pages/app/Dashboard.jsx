@@ -94,7 +94,7 @@ export default function Dashboard() {
         </div>
       </header>
 
-      <div className="grid min-w-0 gap-4 lg:grid-cols-12">
+      <div className="grid min-w-0 grid-cols-1 gap-4 lg:grid-cols-12">
         <div className="space-y-4 lg:col-span-7">
           <BalanceCard
             account={activeAccount}
@@ -173,7 +173,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <div className="grid min-w-0 gap-4 lg:grid-cols-12">
+      <div className="grid min-w-0 grid-cols-1 gap-4 lg:grid-cols-12">
         <div className="lg:col-span-7">
           <SectionCard
             title="Recent transactions"

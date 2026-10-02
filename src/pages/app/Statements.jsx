@@ -145,7 +145,7 @@ export default function Statements() {
           {error ? <p className="text-[13px] text-danger-600">{error.message}</p> : statement?.transactions.length ? (
             <>
               {/* Mobile: one compact row per transaction — no horizontal page scroll. */}
-              <ul className="divide-y divide-ink-100 md:hidden">
+              <ul className="divide-y divide-ink-100 xl:hidden">
                 {statement.transactions.map((transaction) => (
                   <li key={transaction.id} className="flex items-start justify-between gap-3 py-3">
                     <div className="min-w-0">
@@ -177,7 +177,7 @@ export default function Statements() {
               </ul>
 
               {/* Tablet and up: the full statement table. */}
-              <div className="hidden md:block">
+              <div className="hidden xl:block">
                 <div className="scroll-x">
                   <table className="min-w-full text-left text-[12.5px]">
                     <thead>

@@ -9,7 +9,7 @@ function timeLabel(value) {
   return new Intl.DateTimeFormat(undefined, { dateStyle: 'short', timeStyle: 'short' }).format(new Date(value))
 }
 
-export function CustomerCareChat() {
+export function CustomerCareChat({ showLauncher = true } = {}) {
   const { isAuthenticated } = useAuth()
   const [open, setOpen] = useState(false)
   const [conversations, setConversations] = useState([])
@@ -94,6 +94,8 @@ export function CustomerCareChat() {
 
   const selected = conversations.find((item) => String(item._id) === conversationId)
 
+  if (!open && !showLauncher) return null
+
   return (
     <div className="fixed bottom-20 right-4 z-[60] flex flex-col items-end gap-3 sm:bottom-6 sm:right-6">
       {open ? (
@@ -146,9 +148,11 @@ export function CustomerCareChat() {
           )}
         </section>
       ) : null}
-      <button type="button" onClick={() => setOpen((value) => !value)} aria-label={open ? 'Close customer care chat' : 'Open customer care chat'} title="Customer care" className="flex size-12 items-center justify-center rounded-full bg-brand-700 text-white shadow-pop transition hover:bg-brand-800">
-        {open ? <X className="size-5" aria-hidden="true" /> : <MessageCircle className="size-5" aria-hidden="true" />}
-      </button>
+      {showLauncher ? (
+        <button type="button" onClick={() => setOpen((value) => !value)} aria-label={open ? 'Close customer care chat' : 'Open customer care chat'} title="Customer care" className="flex size-12 items-center justify-center rounded-full bg-brand-700 text-white shadow-pop transition hover:bg-brand-800">
+          {open ? <X className="size-5" aria-hidden="true" /> : <MessageCircle className="size-5" aria-hidden="true" />}
+        </button>
+      ) : null}
     </div>
   )
 }
