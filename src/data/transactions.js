@@ -11,6 +11,7 @@ import { BANKS } from './banks.js'
  */
 
 const DAYS_OF_HISTORY = 190
+const HISTORY_END_DATE = new Date('2026-06-01T12:00:00.000Z')
 const PRNG_SEED = 20260214
 
 const PEOPLE = [
@@ -226,12 +227,11 @@ function generateTransactions() {
   const helpers = makeHelpers(random)
   const { pick, int, amount, code } = helpers
   const totalWeight = TEMPLATES.reduce((sum, template) => sum + template.weight, 0)
-  const now = new Date()
   const raw = []
   let sequence = 0
 
   for (let daysAgo = 0; daysAgo < DAYS_OF_HISTORY; daysAgo += 1) {
-    const date = new Date(now)
+    const date = new Date(HISTORY_END_DATE)
     date.setDate(date.getDate() - daysAgo)
     date.setHours(int(7, 22), int(0, 59), int(0, 59), 0)
 
@@ -329,5 +329,4 @@ export function transactionById(id) {
 export function transactionsForCard(cardId, limit = 8) {
   return TRANSACTIONS.filter((txn) => txn.cardId === cardId).slice(0, limit)
 }
-
 
