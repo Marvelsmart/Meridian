@@ -58,6 +58,7 @@ async function requestBackend(path, options = {}) {
   try {
     response = await fetch(`${API_BASE_URL}${path}`, {
       ...options,
+      cache: 'no-store',
       headers: {
         'Content-Type': 'application/json',
         'X-Device-Id': getDeviceId(),

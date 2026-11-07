@@ -55,6 +55,12 @@ async function seedDemoTransactions() {
     if (!duplicateOnly) throw error
   }
 
+  await Transaction.deleteMany({
+    visibility: 'shared',
+    owner: { $exists: false },
+    reference: { $nin: TRANSACTIONS.map((transaction) => transaction.reference) },
+  })
+
   billerSeedPromise ??= seedDemoBillers().catch((error) => {
     billerSeedPromise = undefined
     throw error

@@ -13,6 +13,10 @@ export function createApp() {
   const allowedOrigins = new Set([env.clientOrigin, 'http://localhost:5173', 'http://127.0.0.1:5173'])
   app.use(helmet())
   app.use(cors({ origin: (origin, callback) => callback(null, !origin || allowedOrigins.has(origin)) }))
+  app.use('/api', (req, res, next) => {
+    res.set('Cache-Control', 'no-store')
+    next()
+  })
   app.use(express.json({ limit: '100kb' }))
   app.use(morgan('tiny'))
   app.get('/api/health', (req, res) => res.json({ ok: true }))
