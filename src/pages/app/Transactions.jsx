@@ -20,7 +20,7 @@ const DEFAULT_FILTERS = {
   category: 'all',
   type: 'all',
   accountId: 'all',
-  range: '30d',
+  range: 'all',
   from: '',
   to: '',
   sort: 'date-desc',
@@ -47,7 +47,7 @@ export default function Transactions() {
     search: params.get('q') ?? '',
     status: params.get('status') ?? 'all',
     category: params.get('category') ?? 'all',
-    range: params.get('range') ?? '30d',
+    range: params.get('range') ?? DEFAULT_FILTERS.range,
     page: Number(params.get('page') ?? 1) || 1,
   }))
 
@@ -56,7 +56,7 @@ export default function Transactions() {
     if (filters.search) next.set('q', filters.search)
     if (filters.status !== 'all') next.set('status', filters.status)
     if (filters.category !== 'all') next.set('category', filters.category)
-    if (filters.range !== '30d') next.set('range', filters.range)
+    if (filters.range !== DEFAULT_FILTERS.range) next.set('range', filters.range)
     if (filters.page > 1) next.set('page', String(filters.page))
     setParams(next, { replace: true })
   }, [filters, setParams])
